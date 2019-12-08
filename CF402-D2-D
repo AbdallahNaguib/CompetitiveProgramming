@@ -1,0 +1,99 @@
+#include <bits/stdc++.h>
+#include <ext/pb_ds/assoc_container.hpp>
+#define loop(i,n) for(int i=0 ; i<n ; i++)
+#define rep(i,x,n) for(int i=x ; i<=n ; i++)
+using namespace std;
+using namespace __gnu_pbds;
+typedef long long ll;
+template<typename T>
+using ordered_set = tree<T, null_type, less<T>, rb_tree_tag, tree_order_statistics_node_update>;
+const int N=5e3 + 5,M=5e5+5, MOD=998244353;
+int n,m;
+int arr[N];
+int prime[N][40],st[N];
+set<int> primeSet[N];
+int main() {
+#ifndef ONLINE_JUDGE
+    freopen("in.txt", "rt", stdin);
+#endif
+    ios_base::sync_with_stdio(0), cin.tie(0), cout.tie(0);
+    cin>>n>>m;
+    loop(i,n){
+        cin>>arr[i];
+        for(int j=2 ; j*j<=arr[i] ; j++){
+            while(arr[i]%j==0){
+                prime[i][st[i]++]=j;
+                arr[i]/=j;
+            }
+        }
+        if(arr[i]>=2){
+            prime[i][st[i]++]=arr[i];
+            arr[i]=1;
+        }
+    }
+    int ans=0;
+    map<int,bool> bad;
+    loop(i,m){
+        int x;
+        cin>>x;
+        bad[x]=1;
+    }
+    map<int,multiset<int>> mp;
+    loop(i,n){
+        int cur=1;
+        if(st[i]==0)continue;
+        primeSet[i].insert(prime[i][0]);
+        rep(j,1,st[i]-1){
+            if(prime[i][j]!=prime[i][j-1]){
+                mp[prime[i][j-1]].insert(cur);
+                if(bad[prime[i][j-1]]){
+                    ans-=cur;
+                }else{
+                    ans+=cur;
+                }
+                cur=1;
+            }else{
+                cur++;
+            }
+            primeSet[i].insert(prime[i][j]);
+        }
+        mp[prime[i][st[i]-1]].insert(cur);
+        if(bad[prime[i][st[i]-1]]){
+            ans-=cur;
+        }else{
+            ans+=cur;
+        }
+    }
+    map<int,int> del;
+    for(int i=n-1 ; ~i ; --i){
+        map<int,int> curDel;
+        int curAns=0;
+        for(int x:primeSet[i]){
+            if(mp[x].size() <= i)continue;
+            int val=(*mp[x].begin()) - del[x];
+            if(val<=0)continue;
+            curDel[x]=val;
+            if(bad[x])curAns-=curDel[x]*(i+1);
+            else curAns+=curDel[x]*(i+1);
+        }
+        if(curAns<0){
+            // it worth an operation
+            ans-=curAns;
+            for(auto pr:curDel){
+                del[pr.first]+=pr.second;
+            }
+        }
+        if(st[i]==0)continue;
+        int cur=1;
+        rep(j,1,st[i]-1){
+            if(prime[i][j]!=prime[i][j-1]){
+                mp[prime[i][j-1]].erase(mp[prime[i][j-1]].lower_bound(cur));
+                cur=1;
+            }else{
+                cur++;
+            }
+        }
+        mp[prime[i][st[i]-1]].erase(mp[prime[i][st[i]-1]].lower_bound(cur));
+    }
+    cout<<ans<<endl;
+}
