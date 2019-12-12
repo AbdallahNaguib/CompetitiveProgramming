@@ -1,0 +1,55 @@
+#include <bits/stdc++.h>
+#include <ext/pb_ds/assoc_container.hpp>
+#define loop(i,n) for(ll i=0 ; i<n ; i++)
+#define rep(i,x,n) for(ll i=x ; i<=n ; i++)
+using namespace std;
+using namespace __gnu_pbds;
+typedef long long ll;
+template<typename T>
+using ordered_set = tree<T, null_type, less<T>, rb_tree_tag, tree_order_statistics_node_update>;
+const ll N=2e5 + 5,M=5e5+5, MOD=1e9 + 7;
+vector<ll> graph[N];
+ll ans[N],b[N],n;
+ll gcd(ll a, ll b) {
+    if (b == 0)
+        return a;
+    return gcd(b, a % b);
+}
+void dfs(ll u,ll p,const map<ll,ll> &mp){
+    map<ll,ll> mp2;
+    mp2[b[u]]=1;
+    for(auto pr:mp){
+        mp2[gcd(b[u],pr.first)]+=pr.second;
+    }
+    for(auto pr:mp2){
+        ans[u]+=pr.first*pr.second;
+    }
+    for(auto v:graph[u]){
+        if(v==p)continue;
+        dfs(v,u,mp2);
+    }
+}
+int main() {
+#ifndef ONLINE_JUDGE
+    freopen("in.txt", "rt", stdin);
+#endif
+    ios_base::sync_with_stdio(0), cin.tie(0), cout.tie(0);
+    cin>>n;
+    rep(i,1,n){
+        cin>>b[i];
+    }
+    int u,v;
+    loop(i,n-1){
+        cin>>u>>v;
+        graph[u].push_back(v);
+        graph[v].push_back(u);
+    }
+    map<ll,ll> mp;
+    dfs(1,-1,mp);
+    ll res=0;
+    rep(i,1,n){
+        res+=ans[i];
+        res%=MOD;
+    }
+    cout<<res<<endl;
+}
