@@ -1,0 +1,83 @@
+#include <bits/stdc++.h>
+#include <ext/pb_ds/assoc_container.hpp>
+#define loop(i,n) for(ll i=0 ; i<n ; i++)
+#define rep(i,x,n) for(ll i=x ; i<=n ; i++)
+using namespace std;
+using namespace __gnu_pbds;
+typedef long long ll;
+template<typename T>
+using ordered_set = tree<T, null_type, less<T>, rb_tree_tag, tree_order_statistics_node_update>;
+const ll N=3e5 + 5,M=5e5+5, MOD=1e9 + 7 , MAX=5e6;
+vector<ll> bads;
+map<ll,ll> cnt;
+bool isGood(ll x){
+    return !(x&(x-1));
+}
+int n;
+ll comp[N];
+int main() {
+#ifndef ONLINE_JUDGE
+    freopen("in.txt", "rt", stdin);
+#endif
+    ios_base::sync_with_stdio(0), cin.tie(0), cout.tie(0);
+    cin>>n;
+    loop(i,n){
+        ll x;
+        cin>>x;
+        if(isGood(x))cnt[x]++;
+        else bads.push_back(x);
+    }
+    stack<pair<ll,ll>> lsts;
+    ll mn=1e9;
+    ll x=1;
+    while(x<=1e12){
+        cnt[x];
+        x*=2;
+    }
+    for(auto pr:cnt){
+        mn=min(mn,pr.second);
+        lsts.push({pr.first,mn});
+    }
+    int com=0;
+    while(!lsts.empty()){
+        ll cur=lsts.top().first;
+        ll mnOcu=lsts.top().second;
+        lsts.pop();
+        ll diff=cnt[cur]-mnOcu;
+        while(diff--){
+            bads.push_back(cur);
+        }
+        ll val=mnOcu-com;
+        while(val--){
+            comp[com++]=cur;
+        }
+    }
+    if(bads.size()>com){
+        cout<<-1<<endl;
+        return 0;
+    }
+    sort(bads.begin(),bads.end());
+    reverse(bads.begin(),bads.end());
+    for(int i=0 ;i<bads.size() ; i++){
+        if(bads[i]>comp[i]*2){
+            cout<<-1<<endl;
+            return 0;
+        }
+    }
+    int lstFilled=bads.size()-1;
+    stack<int> res;
+    int curAns=com;
+    res.push(curAns);
+    for(int i=com-1 ; i>lstFilled ; i--){
+        int sz=log2(comp[i])+1;
+        lstFilled+=sz;
+        if(lstFilled<i){
+            res.push(--curAns);
+        }
+    }
+    while(!res.empty()){
+        cout<<res.top()<<" ";
+        res.pop();
+    }
+    cout<<endl;
+}
