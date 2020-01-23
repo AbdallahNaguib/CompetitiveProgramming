@@ -1,0 +1,67 @@
+#include <bits/stdc++.h>
+#include <ext/pb_ds/assoc_container.hpp>
+#include <unistd.h>
+
+
+#define ll long long
+#define lst(x) x.size()-1
+#define ld long double
+#define pr pair<ll,ll>
+#define loop(i,n) for(ll i=0 ; i<n ; ++i)
+#define rep(i,x,n) for(ll i=x ; i<=n ; ++i)
+#define iteloop(type,data,name,it) for(type<data>::iterator it=name.begin() ;it!=name.end() ; ++it)
+
+using namespace __gnu_pbds;
+using namespace std;
+
+template<typename T>
+using os = tree<T, null_type, less<T>, rb_tree_tag,
+        tree_order_statistics_node_update>;
+
+const ll N=2e5+5,M=1e1+5,MOD=1e9+7,OO=1e9;
+int n,m;
+int cnt[N];
+vector<int> arr[N];
+int main(){
+    cin.sync_with_stdio(false), cin.tie(0) , cout.tie(0);
+#ifndef ONLINE_JUDGE
+    freopen("in.txt", "rt" , stdin);
+    // freopen("in.txt", "wt" , stdout);
+#endif // ONLINE_JUDGE
+    cin>>n>>m;
+    int x;
+    loop(i,n){
+        loop(j,m){
+            cin>>x;
+            arr[j].push_back(x);
+        }
+    }
+    int ans=0;
+    loop(i,m){
+        set<pair<int,int>> ind;
+        loop(j,n){
+            ind.insert({j*m+i+1,j});
+        }
+        memset(cnt,0,n*(sizeof(cnt[0])));
+        loop(j,n){
+            x=arr[i][j];
+            auto it=ind.lower_bound({x,0});
+            if(it->first!=x){
+                // -1
+            }else{
+                int diff=j-it->second;
+                if(diff<0){
+                    diff+=n;
+                }
+                cnt[diff]++;
+            }
+        }
+        int colAns=OO;
+        loop(shft,n){
+            int curAns=shft+(n-cnt[shft]);
+            colAns=min(curAns,colAns);
+        }
+        ans+=colAns;
+    }
+    cout<<ans<<endl;
+}
