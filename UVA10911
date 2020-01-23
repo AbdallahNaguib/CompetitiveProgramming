@@ -1,0 +1,66 @@
+#include <bits/stdc++.h>
+#include <ext/pb_ds/assoc_container.hpp>
+#include <unistd.h>
+
+
+#define ll long long
+#define lst(x) x.size()-1
+#define ld long double
+#define pr pair<double,double>
+#define loop(i,n) for(ll i=0 ; i<n ; ++i)
+#define rep(i,x,n) for(ll i=x ; i<=n ; ++i)
+#define iteloop(type,data,name,it) for(type<data>::iterator it=name.begin() ;it!=name.end() ; ++it)
+
+using namespace __gnu_pbds;
+using namespace std;
+
+template<typename T>
+using os = tree<T, null_type, less<T>, rb_tree_tag,
+        tree_order_statistics_node_update>;
+
+const ll N=1e2+5,M=1e1+5,MOD=1e9+7,OO=1e9;
+
+bool taken[20];
+pr pos[20];
+int n;
+double dist(pr a,pr b){
+    double frst=a.first-b.first;
+    double scnd=a.second-b.second;
+    return sqrt(frst*frst+scnd*scnd);
+}
+double solve(int s){
+    taken[s]=1;
+    double mn=OO;
+    loop(i,2*n){
+        if(taken[i])continue;
+        taken[i]=1;
+        double ans=dist(pos[s],pos[i]);
+        loop(j,2*n){
+            if(taken[j])continue;
+            ans+=solve(j);
+            break;
+        }
+        mn=min(mn,ans);
+        taken[i]=0;
+    }
+    taken[s]=0;
+    return mn;
+}
+int main(){
+    cin.sync_with_stdio(false), cin.tie(0) , cout.tie(0);
+#ifndef ONLINE_JUDGE
+    freopen("in.txt", "rt" , stdin);
+    // freopen("in.txt", "wt" , stdout);
+#endif // ONLINE_JUDGE
+int t=0;
+    while(cin>>n && n){
+        t++;
+        string str;
+        memset(taken,0, sizeof(taken));
+        loop(i,2*n){
+            cin>>str>>pos[i].first>>pos[i].second;
+        }
+        cout<<"Case "<<t<<": ";
+        cout<<fixed<<setprecision(2)<<solve(0)<<endl;
+    }
+}
