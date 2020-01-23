@@ -1,0 +1,85 @@
+#include <bits/stdc++.h>
+#include <ext/pb_ds/assoc_container.hpp>
+#include <unistd.h>
+
+
+#define ll long long
+#define lst(x) x.size()-1
+#define ld long double
+#define pr pair<ll,ll>
+#define loop(i,n) for(ll i=0 ; i<n ; ++i)
+#define rep(i,x,n) for(ll i=x ; i<=n ; ++i)
+#define iteloop(type,data,name,it) for(type<data>::iterator it=name.begin() ;it!=name.end() ; ++it)
+
+using namespace __gnu_pbds;
+using namespace std;
+
+template<typename T>
+using os = tree<T, null_type, less<T>, rb_tree_tag,
+        tree_order_statistics_node_update>;
+const ll N=2e6+5,M=1e1+5,MOD=1e9+7,OO=1e9;
+ll q,x;
+pr st[N];
+ll getMid(ll s, ll e){
+    return (s+e)/2;
+}
+void update(ll ss, ll se,
+                 ll index, ll node){
+    if(ss>se)return;
+    if (ss == se){
+        st[node].first++;
+    }else{
+        ll mid = getMid(ss, se);
+
+        if (index >= ss && index <= mid)
+            update(ss, mid, index,
+                         2 * node + 1);
+        else
+            update(mid + 1, se,
+                        index, 2 * node + 2);
+
+        st[node] = min(st[2 * node + 1],
+                       st[2 * node + 2]);
+    }
+    return;
+}
+void construct(ll ss, ll se,
+                 ll node){
+    if(ss>se)return;
+    if (ss == se){
+        st[node].second=ss;
+    }else{
+        ll mid = getMid(ss, se);
+        construct(ss, mid,
+                    2 * node + 1);
+        construct(mid + 1, se,
+                     2 * node + 2);
+        st[node] = min(st[2 * node + 1],
+                       st[2 * node + 2]);
+    }
+    return;
+}
+void update(ll index){
+    update(0,x-1,index,0);
+}
+pr getmin(){
+    return st[0];
+}
+
+int main(){
+    cin.sync_with_stdio(false), cin.tie(0) , cout.tie(0);
+#ifndef ONLINE_JUDGE
+    freopen("in.txt", "rt" , stdin);
+    // freopen("in.txt", "wt" , stdout);
+#endif // ONLINE_JUDGE
+    cin>>q>>x;
+    construct(0,x-1,0);
+    loop(i,q) {
+        ll v;
+        cin >> v;
+        v %= x;
+        update(v);
+        pr ans = getmin();
+        cout << ans.first * x + ans.second << endl;
+    }
+}
