@@ -1,0 +1,80 @@
+#include <bits/stdc++.h>
+#include <ext/pb_ds/assoc_container.hpp>
+#include <unistd.h>
+
+
+#define ll long long
+#define lst(x) x.size()-1
+#define ld long double
+#define pr pair<ll,ll>
+#define loop(i,n) for(int i=0 ; i<n ; ++i)
+#define rep(i,x,n) for(int i=x ; i<=n ; ++i)
+#define iteloop(type,data,name,it) for(type<data>::iterator it=name.begin() ;it!=name.end() ; ++it)
+
+using namespace __gnu_pbds;
+using namespace std;
+
+template<typename T>
+using os = tree<T, null_type, less_equal<T>, rb_tree_tag,
+        tree_order_statistics_node_update>;
+
+const int N=5e3+5,M=1e1+5,MOD=1e9+7,OO=1e9;
+int n,m;
+vector<int> goes[N];
+int lst[N];
+int a[N],b[N],c[N];
+priority_queue<int> pq;
+void push(int x){
+    pq.push(x*-1);
+}
+int top(){
+    return pq.top()*-1;
+}
+int main(){
+    cin.sync_with_stdio(false), cin.tie(0) , cout.tie(0);
+#ifndef ONLINE_JUDGE
+    freopen("in.txt", "rt" , stdin);
+    // freopen("in.txt", "wt" , stdout);
+#endif // ONLINE_JUDGE
+    int k;
+    cin>>n>>m>>k;
+    rep(i,1,n){
+        cin>>a[i]>>b[i]>>c[i];
+    }
+    loop(i,m){
+        int u,v;
+        cin>>u>>v;
+        lst[v]=max(lst[v],u);
+    }
+    rep(i,1,n){
+        if(lst[i]==0)
+            lst[i]=i;
+        goes[lst[i]].push_back(i);
+    }
+    rep(i,1,n){
+        if(k+pq.size()<a[i]){
+            cout<<-1<<endl;
+            return 0;
+        }
+        int need=max(0,a[i]-k);
+        loop(j,need){
+            pq.pop();
+        }
+        k+=need+b[i];
+        for(int x:goes[i]){
+            if(k>0){
+                push(c[x]);
+                k--;
+            }else if(pq.size()>0 && c[x]>top()){
+                pq.pop();
+                push(c[x]);
+            }
+        }
+    }
+    ll sum=0;
+    while(!pq.empty()){
+        sum+=top();
+        pq.pop();
+    }
+    cout<<sum<<endl;
+}
