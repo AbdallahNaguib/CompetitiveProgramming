@@ -1,0 +1,91 @@
+#include <bits/stdc++.h>
+#include <ext/pb_ds/assoc_container.hpp>
+#include <unistd.h>
+
+
+#define ll long long
+#define lst(x) x.size()-1
+#define ld long double
+#define pr pair<ll,ll>
+#define loop(i, n) for(int i=0 ; i<n ; ++i)
+#define rep(i, x, n) for(int i=x ; i<=n ; ++i)
+#define iteloop(type, data, name, it) for(type<data>::iterator it=name.begin() ;it!=name.end() ; ++it)
+
+using namespace __gnu_pbds;
+using namespace std;
+
+template<typename T>
+using os = tree<T, null_type, less<T>, rb_tree_tag,
+        tree_order_statistics_node_update>;
+
+const int N = 1e5 + 5, M = 25, MOD = 998244353, OO = 1e9;
+string l,r;
+pair<ll,int> memo[M+3][(1<<10)+5][3][3];
+ll p10[M+3];
+int k;
+pair<ll,int> dp(int lftDig,int mask,bool satSm,bool satBg){
+    if(lftDig<0)return {0,1};// this 1 is VIN
+    int taken=0;
+    loop(i,10){
+        if(mask & (1<<i)){
+            taken++;
+        }
+    }
+    pair<ll,int> &res=memo[lftDig][mask][satSm][satBg];
+    if(~res.first)return res;
+    res.first=0;
+    if(lftDig==1){
+        lftDig=1;
+    }
+    res.second=0;
+    loop(i,10){
+        if(!(mask & (1<<i)) && taken>=k)continue;
+        bool curSm=false;
+        if(satSm)curSm= true;
+        if(!curSm){
+            if(l[lftDig]-'0'>i)continue;
+            else if(l[lftDig]-'0'<i)curSm=true;
+        }
+
+        bool curBg=false;
+        if(satBg)curBg= true;
+        if(!curBg){
+            if(r[lftDig]-'0'<i)continue;
+            else if(r[lftDig]-'0'>i)curBg=true;
+        }
+        pr rr;
+        if(i==0 && mask==0) {
+            rr=dp(lftDig - 1, mask, curSm, curBg);
+        }else {
+            rr=dp(lftDig - 1, mask | (1 << i), curSm, curBg);
+        }
+        res.first += (((p10[lftDig] * i)%MOD) * rr.second)%MOD + rr.first;
+        res.second+=rr.second;
+        res.second%=MOD;
+        res.first%=MOD;
+    }
+    return res;
+}
+int main() {
+    cin.sync_with_stdio(false), cin.tie(0), cout.tie(0);
+#ifndef ONLINE_JUDGE
+    freopen("in.txt", "rt", stdin);
+    // freopen("in.txt", "wt" , stdout);
+#endif
+    p10[0]=1;
+    rep(i,1,M){
+        p10[i]=p10[i-1]*10;
+        p10[i]%=MOD;
+    }
+    cin>>l>>r>>k;
+    int lLft=M-l.size();
+    int rLft=M-r.size();
+
+    reverse(l.begin(),l.end());
+    reverse(r.begin(),r.end());
+
+    loop(i,lLft)l.push_back('0');
+    loop(i,rLft)r.push_back('0');
+    memset(memo,-1, sizeof(memo));
+    cout<<dp(M-1,0,0,0).first<<endl;
+}
