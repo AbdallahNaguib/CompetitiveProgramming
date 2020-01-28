@@ -1,0 +1,80 @@
+#include <bits/stdc++.h>
+#include <ext/pb_ds/assoc_container.hpp>
+#include <unistd.h>
+
+
+#define ll long long
+#define lst(x) x.size()-1
+#define ld long double
+#define pr pair<ll,ll>
+#define loop(i, n) for(int i=0 ; i<n ; ++i)
+#define rep(i, x, n) for(int i=x ; i<=n ; ++i)
+#define iteloop(type, data, name, it) for(type<data>::iterator it=name.begin() ;it!=name.end() ; ++it)
+
+using namespace __gnu_pbds;
+using namespace std;
+
+template<typename T>
+using os = tree<T, null_type, less<T>, rb_tree_tag,
+        tree_order_statistics_node_update>;
+
+const int N = 1e5 + 5, M = 25, MOD = 998244353, OO = 1e9;
+int n,q=60;
+bool valid(int x){
+    q--;
+    cout<<"> "<<x<<endl;
+    int res;
+    cin>>res;
+    return !res;
+}
+int gcd(int a, int b) {
+    if (b == 0)
+        return a;
+    return gcd(b, a % b);
+}
+int main() {
+    cin.sync_with_stdio(false), cin.tie(0), cout.tie(0);
+#ifndef ONLINE_JUDGE
+    //freopen("in.txt", "rt", stdin);
+    // freopen("in.txt", "wt" , stdout);
+#endif
+    mt19937 rng(chrono::steady_clock::now().time_since_epoch().count());
+
+    cin>>n;
+    vector<int> vec(n);
+    loop(i,n){
+        vec[i]=i+1;
+    }
+    for (int i = 1; i < n; i++)
+        swap(vec[i], vec[uniform_int_distribution<int>(0, i)(rng)]);
+
+    int st=1,en=1e9;
+    while(st<=en){
+        int mid=(st+en)/2;
+        if(valid(mid)){
+            en=mid-1;
+        }else{
+            st=mid+1;
+        }
+    }
+    int mx=en+1;
+    set<int> nums;
+    nums.insert(mx);
+    loop(i,q){
+        int ind=rand()%n;
+        cout<<"? "<<vec[ind]<<endl;
+        int x;
+        cin>>x;
+        nums.insert(x);
+    }
+    vector<int> ele;
+    for(int x:nums){
+        ele.push_back(x);
+    }
+    int diff=ele[1]-ele[0];
+    rep(i,1,(int)ele.size()-2){
+        diff=gcd(diff,ele[i+1]-ele[i]);
+    }
+    int mn=mx-diff*(n-1);
+    cout<<"! "<<mn<<" "<<diff<<endl;
+}
