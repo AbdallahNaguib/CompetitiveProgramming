@@ -1,0 +1,63 @@
+#include <bits/stdc++.h>
+#include <ext/pb_ds/assoc_container.hpp>
+#include <unistd.h>
+
+
+#define ll long long
+#define lst(x) x.size()-1
+#define ld long double
+#define pr pair<ll,ll>
+#define loop(i, n) for(int i=0 ; i<n ; ++i)
+#define rep(i, x, n) for(int i=x ; i<=n ; ++i)
+#define iteloop(type, data, name, it) for(type<data>::iterator it=name.begin() ;it!=name.end() ; ++it)
+
+using namespace __gnu_pbds;
+using namespace std;
+
+template<typename T>
+using os = tree<T, null_type, less<T>, rb_tree_tag,
+        tree_order_statistics_node_update>;
+
+const int N = 1e5 + 5, M = 25, MOD = 998244353, OO = 1e9;
+string s,t;
+set<int> pos[30];
+int main() {
+    cin.sync_with_stdio(false), cin.tie(0), cout.tie(0);
+#ifndef ONLINE_JUDGE
+    freopen("in.txt", "rt", stdin);
+    // freopen("in.txt", "wt" , stdout);
+#endif
+    int x;
+    cin>>x;
+    while(x--){
+        cin>>s>>t;
+        rep(ch,'a','z'){
+            pos[ch-'a'].clear();
+        }
+        loop(i,s.size()){
+            pos[s[i]-'a'].insert(i);
+        }
+        int cur=0;
+        int ans=1;
+        bool no=false;
+        loop(i,t.size()){
+            auto it=pos[t[i]-'a'].lower_bound(cur);
+            if(pos[t[i]-'a'].size()==0){
+                no=true;
+                break;
+            }
+            if(it==pos[t[i]-'a'].end()){
+                cur=0;
+                ans++;
+                i--;
+                continue;
+            }
+            cur=*it + 1;
+        }
+        if(no){
+            cout<<-1<<endl;
+            continue;
+        }
+        cout<<ans<<endl;
+    }
+}
