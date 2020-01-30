@@ -1,0 +1,114 @@
+
+#include <bits/stdc++.h>
+#include <ext/pb_ds/assoc_container.hpp>
+#include <unistd.h>
+
+
+#define ll long long
+#define lst(x) x.size()-1
+#define ld long double
+#define pr pair<ll,ll>
+#define loop(i, n) for(ll i=0 ; i<n ; ++i)
+#define rep(i, x, n) for(ll i=x ; i<=n ; ++i)
+#define iteloop(type, data, name, it) for(type<data>::iterator it=name.begin() ;it!=name.end() ; ++it)
+
+using namespace __gnu_pbds;
+using namespace std;
+
+template<typename T>
+using os = tree<T, null_type, less<T>, rb_tree_tag,
+        tree_order_statistics_node_update>;
+
+const ll N = 1e5 + 5, M = 25, MOD = 998244353, OO = 1e9;
+ll n,k,m;
+ll arr[N],st[N],en[N],sz[N],vis[N];
+void updateStartAndEnd(){
+    ll lst=0;
+    rep(i,1,n-1){
+        if(arr[i]!=arr[i-1]){
+            lst=i;
+        }
+        st[i]=lst;
+    }
+    lst=n-1;
+    for(ll i=n-1 ; ~i ; --i){
+        if(arr[i]!=arr[i+1]){
+            lst=i;
+        }
+        en[i]=lst;
+    }
+}
+
+
+int main() {
+    cin.sync_with_stdio(false), cin.tie(0), cout.tie(0);
+#ifndef ONLINE_JUDGE
+    freopen("in.txt", "rt", stdin);
+    // freopen("in.txt", "wt" , stdout);
+#endif
+    cin>>n>>k>>m;
+    stack<pr> stk;
+    loop(i,n){
+        cin>>arr[i];
+        if(!stk.empty() && stk.top().first==arr[i]){
+            pr p=stk.top();
+            stk.pop();
+            if(p.second+1!=k)
+                stk.push({arr[i],p.second+1});
+        }else{
+            stk.push({arr[i],1});
+        }
+    }
+    int ind=0;
+    while(!stk.empty()){
+        pr p=stk.top();
+        stk.pop();
+        loop(i,p.second)arr[ind++]=p.first;
+    }
+    n=ind;
+
+    loop(i,n/2){
+        swap(arr[i],arr[n-i-1]);
+
+    }
+    updateStartAndEnd();
+
+    ll lt=0,rt=n-1;
+    while(lt<=rt){
+        ll ltSize=en[lt]-st[lt]+1;
+        ll rtSize=en[rt]-st[rt]+1;
+        if(st[lt]==st[rt]) {
+            ll len=ltSize*m;
+            len%=k;
+            if(len==0){
+                cout<<0<<endl;
+            }else{
+                cout<<len+st[lt]+(n-en[rt]-1)<<endl;
+            }
+            return 0;
+        }
+        if(arr[lt]!=arr[rt]){
+            // (m-2) with all of this range
+            ll range = en[rt] - st[lt] + 1;
+            range *= (m - 2);
+            range += en[rt] + 1;
+            range += n - st[lt];
+            cout << range << endl;
+            return 0;
+        }else if(((ltSize+rtSize)%k != 0 )){
+            // (m-2) with all of this range
+            ll range = en[rt] - st[lt] + 1;
+            if(ltSize+rtSize>k)range-=k;
+            range *= (m - 2);
+            range += en[rt] + 1;
+            range += n - st[lt];
+            if(ltSize+rtSize>k)range-=k;
+            cout << range << endl;
+            return 0;
+        }else{
+            lt=en[lt]+1;
+            rt=st[rt]-1;
+        }
+    }
+    cout<<0<<endl;
+}
