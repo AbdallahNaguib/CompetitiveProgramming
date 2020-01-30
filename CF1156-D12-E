@@ -1,0 +1,109 @@
+#include <bits/stdc++.h>
+#include <ext/pb_ds/assoc_container.hpp>
+#include <unistd.h>
+
+
+#define ll long long
+#define lst(x) x.size()-1
+#define ld long double
+#define pr pair<ll,ll>
+#define loop(i, n) for(ll i=0 ; i<n ; ++i)
+#define rep(i, x, n) for(ll i=x ; i<=n ; ++i)
+#define iteloop(type, data, name, it) for(type<data>::iterator it=name.begin() ;it!=name.end() ; ++it)
+
+using namespace __gnu_pbds;
+using namespace std;
+
+template<typename T>
+using os = tree<T, null_type, less<T>, rb_tree_tag,
+        tree_order_statistics_node_update>;
+
+const ll N = 1e6+ 5, M = 25, MOD = 998244353, OO = 1e9;
+int sg[N],arr[N],ind[N];
+int n;
+void build(int st=0,int en=n-1,int si=0){
+    int a=si*2+1;
+    int b=a+1;
+    int mid=(st+en)/2;
+    if(st==en){
+        sg[si]=arr[st];
+        return;
+    }
+    build(st,mid,a);
+    build(mid+1,en,b);
+    sg[si]=max(sg[a],sg[b]);
+}
+int query(int qs,int qe,int st=0,int en=n-1,int si=0){
+    int a=si*2+1;
+    int b=a+1;
+    int mid=(st+en)/2;
+    if(qs>en || qe<st){
+        return 0;
+    }
+    if(qs<=st && qe>=en){
+        return sg[si];
+    }
+    return max(query(qs,qe,st,mid,a),query(qs,qe,mid+1,en,b));
+}
+int findMaxFront(int i){
+    int st=i+1,en=n-1;
+    bool found=false;
+    while(st<=en){
+        int mid=(st+en)/2;
+        if(query(i+1,mid)>arr[i]){
+            en=mid-1;
+            found=true;
+        }else{
+            st=mid+1;
+        }
+    }
+    if(!found)return n;
+    return en+1;
+}
+int findMaxBack(int i){
+    int st=0,en=i-1;
+    bool found=false;
+    while(st<=en){
+        int mid=(st+en)/2;
+        if(query(mid,i-1)>arr[i]){
+            st=mid+1;
+            found=true;
+        }else{
+            en=mid-1;
+        }
+    }
+    if(!found)return -1;
+    return st-1;
+}
+
+int main() {
+    cin.sync_with_stdio(false), cin.tie(0), cout.tie(0);
+#ifndef ONLINE_JUDGE
+    freopen("in.txt", "rt", stdin);
+    // freopen("in.txt", "wt" , stdout);
+#endif
+    cin>>n;
+    loop(i,n){
+        cin>>arr[i];
+        ind[arr[i]]=i;
+    }
+    ll res=0;
+    build();
+    loop(i,n){
+        int mxFront=findMaxFront(i);
+        int mxBack=findMaxBack(i);
+        int ltSt=mxBack+1;
+        int ltEn=i-1;
+        int rtSt=i+1;
+        int rtEn=mxFront-1;
+        if(ltEn-ltSt>rtEn-rtSt){
+            swap(rtEn,ltEn);
+            swap(rtSt,ltSt);
+        }
+        rep(j,ltSt,ltEn){
+            int index=ind[arr[i]-arr[j]];
+            res+=(index>=rtSt && index<=rtEn);
+        }
+    }
+    cout<<res<<endl;
+}
