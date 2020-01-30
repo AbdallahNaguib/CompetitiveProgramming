@@ -1,0 +1,108 @@
+#include <bits/stdc++.h>
+#include <ext/pb_ds/assoc_container.hpp>
+#include <unistd.h>
+
+
+#define ll long long
+#define lst(x) x.size()-1
+#define ld long double
+#define pr pair<ll,ll>
+#define loop(i, n) for(ll i=0 ; i<n ; ++i)
+#define rep(i, x, n) for(ll i=x ; i<=n ; ++i)
+#define iteloop(type, data, name, it) for(type<data>::iterator it=name.begin() ;it!=name.end() ; ++it)
+
+using namespace __gnu_pbds;
+using namespace std;
+
+template<typename T>
+using os = tree<T, null_type, less<T>, rb_tree_tag,
+        tree_order_statistics_node_update>;
+
+const ll N = 1e5 + 5, M = 25, MOD = 998244353, OO = 1e9;
+ll gcd(ll a, ll b) {
+    if (b == 0)
+        return a;
+    return gcd(b, a % b);
+}
+
+multiset<ll> primes_factor(ll n){
+    multiset<ll> primes;
+    while (n % 2 == 0){
+        primes.insert(2);
+        n = n/2;
+    }
+    for (ll i = 3; i*i <= n; i = i + 2){
+        while (n % i == 0){
+            primes.insert(i);
+            n = n/i;
+        }
+    }
+    if (n > 2)
+        primes.insert(n);
+    return primes;
+}
+ll n,m;
+ll getCount(ll stMul,ll enMul,ll mul){
+    ll res=enMul/mul;
+    if(enMul%mul==0)res--;
+    ll res2=stMul/mul;
+    if(stMul%mul==0)res2--;
+    return res-res2;
+}
+vector<ll> comp[15];
+void buildComps(ll i,ll tak,ll mul,vector<ll>& elem){
+    if(i>=elem.size()){
+        comp[tak].push_back(mul);
+        return;
+    }
+    buildComps(i+1,tak,mul,elem);
+    buildComps(i+1,tak+1,mul*elem[i],elem);
+}
+int main() {
+    cin.sync_with_stdio(false), cin.tie(0), cout.tie(0);
+#ifndef ONLINE_JUDGE
+    freopen("in.txt", "rt", stdin);
+    // freopen("in.txt", "wt" , stdout);
+#endif
+    ll t;
+    cin>>t;
+    while(t--){
+        cin>>n>>m;
+        ll g=gcd(n,m);
+        multiset<ll> smP=primes_factor(n);
+        multiset<ll> bgP=primes_factor(m);
+        multiset<ll> gcdP=primes_factor(g);
+        for(ll x:gcdP){
+            smP.erase(smP.lower_bound(x));
+            bgP.erase(bgP.lower_bound(x));
+        }
+        vector<ll> big;
+        for(ll x:bgP){
+            if(big.size() &&big.back()==x)continue;
+            big.push_back(x);
+        }
+        loop(i,15){
+            comp[i].clear();
+        }
+        buildComps(0,0,1,big);
+        ll st=1,en=1;
+        for(ll x:smP){
+            st*=x;
+        }
+        for(ll x:bgP){
+            en*=x;
+        }
+        en+=st;
+        ll res=en-st;
+        rep(i,1,13){
+            for(ll x:comp[i]){
+                if(i&1){
+                    res-=getCount(st,en,x);
+                }else{
+                    res+=getCount(st,en,x);
+                }
+            }
+        }
+        cout<<res<<endl;
+    }
+}
