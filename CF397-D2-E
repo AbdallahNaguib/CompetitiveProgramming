@@ -1,0 +1,108 @@
+
+#include <bits/stdc++.h>
+#include <ext/pb_ds/assoc_container.hpp>
+#include <unistd.h>
+
+
+#define ll long long
+#define lst(x) x.size()-1
+#define ld long double
+#define pr pair<ll,ll>
+#define loop(i, n) for(ll i=0 ; i<n ; ++i)
+#define rep(i, x, n) for(ll i=x ; i<=n ; ++i)
+#define iteloop(type, data, name, it) for(type<data>::iterator it=name.begin() ;it!=name.end() ; ++it)
+
+using namespace __gnu_pbds;
+using namespace std;
+
+template<typename T>
+using os = tree<T, null_type, less<T>, rb_tree_tag,
+        tree_order_statistics_node_update>;
+
+const ll N = 3e5 + 5, M = 2e6 + 5, MOD = 1e9 + 7, OO = 1e9;
+vector<int> graph[N];
+int n,q;
+int arr[N],rev[N],lvl[N],sz[N],ind;
+void dfs(int u=1,int p=-1,int l=0){
+    arr[ind++]=u;
+    lvl[u]=l;
+    for(int v:graph[u]){
+        if(v==p)continue;
+        dfs(v,u,l+1);
+        sz[u]+=sz[v];
+    }
+    sz[u]++;
+}
+pr sg[M];
+void update(int qs,int qe,ll val,ll k,int st=0,int en=n-1,int si=0){
+    if(qs>en || qe<st)return;
+    if(qs<=st && qe>=en){
+        sg[si].first+=val;
+        sg[si].first%=MOD;
+        sg[si].second+=k;
+        sg[si].second%=MOD;
+        return;
+    }
+    int mid=(st+en)/2;
+    update(qs,qe,val,k,st,mid,si*2+1);
+    update(qs,qe,val,k,mid+1,en,si*2+2);
+}
+pr getVal(int i,int st=0,int en=n-1,int si=0){
+    if(i<st || i>en){
+        return {0,0};
+    }
+    if(st==en){
+        return sg[si];
+    }
+    pr res=sg[si];
+    int mid=(st+en)/2;
+    pr res2;
+    if(i<=mid){
+        res2=getVal(i,st,mid,si*2+1);
+    }else{
+        res2=getVal(i,mid+1,en,si*2+2);
+    }
+    res.first+=res2.first;
+    res.first%=MOD;
+
+    res.second+=res2.second;
+    res.second%=MOD;
+    return res;
+}
+int main() {
+    cin.sync_with_stdio(false), cin.tie(0), cout.tie(0);
+#ifndef ONLINE_JUDGE
+    freopen("in.txt", "rt", stdin);
+    // freopen("in.txt", "wt" , stdout);
+#endif
+    cin>>n;
+    loop(i,n-1){
+        int p;
+        cin>>p;
+        graph[p].push_back(i+2);
+        graph[i+2].push_back(p);
+    }
+    dfs();
+    loop(i,n){
+        rev[arr[i]]=i;
+    }
+    cin>>q;
+    loop(i,q){
+        ll t,v,x,k;
+        cin>>t;
+        if(t==1){
+            cin>>v>>x>>k;
+            int qs=rev[v];
+            int qe=qs+sz[v]-1;
+            ll val=x+lvl[v]*k;
+            val%=MOD;
+            update(qs,qe,val,k);
+        }else{
+            cin>>v;
+            pr res=getVal(rev[v]);
+            ll ans=res.first-lvl[v]*res.second+N*MOD;// = -1e14
+            ans%=MOD;
+            cout<<ans<<endl;
+        }
+    }
+}
