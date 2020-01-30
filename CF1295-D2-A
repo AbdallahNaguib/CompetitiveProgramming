@@ -1,0 +1,50 @@
+#include <bits/stdc++.h>
+#include <ext/pb_ds/assoc_container.hpp>
+#include <unistd.h>
+
+
+#define ll long long
+#define lst(x) x.size()-1
+#define ld long double
+#define pr pair<ll,ll>
+#define loop(i, n) for(int i=0 ; i<n ; ++i)
+#define rep(i, x, n) for(int i=x ; i<=n ; ++i)
+#define iteloop(type, data, name, it) for(type<data>::iterator it=name.begin() ;it!=name.end() ; ++it)
+
+using namespace __gnu_pbds;
+using namespace std;
+
+template<typename T>
+using os = tree<T, null_type, less<T>, rb_tree_tag,
+        tree_order_statistics_node_update>;
+
+const int N = 1e5 + 5, M = 25, MOD = 998244353, OO = 1e9;
+int n,k,m;
+int arr[N],st[N],en[N];
+int main() {
+    cin.sync_with_stdio(false), cin.tie(0), cout.tie(0);
+#ifndef ONLINE_JUDGE
+    freopen("in.txt", "rt", stdin);
+    // freopen("in.txt", "wt" , stdout);
+#endif
+    int t;
+    cin>>t;
+    while(t--){
+        cin>>n;
+        if(n==2){
+            cout<<1<<endl;
+            continue;
+        }
+        int ones=n/2;
+        int sevens=0;
+        if(n%2==1){
+            sevens=1;
+            ones--;
+        }
+        if(sevens)cout<<7;
+        loop(i,ones){
+            cout<<1;
+        }
+        cout<<endl;
+    }
+}
