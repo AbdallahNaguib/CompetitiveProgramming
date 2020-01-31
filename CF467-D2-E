@@ -1,0 +1,59 @@
+#include <bits/stdc++.h>
+
+#define ll long long
+#define lst(x) x.size()-1
+#define ld long double
+#define pr pair<int,int>
+#define loop(i, n) for(int i=0 ; i<n ; ++i)
+#define rep(i, x, n) for(int i=x ; i<=n ; ++i)
+#define iteloop(type, data, name, it) for(type<data>::iterator it=name.begin() ;it!=name.end() ; ++it)
+
+using namespace std;
+
+const int N = 5e5 + 5, M = 1.1e6, MOD = 1e9 + 7, OO = 1e9;
+int n,arr[N];
+int main() {
+    cin.sync_with_stdio(false), cin.tie(0), cout.tie(0);
+#ifndef ONLINE_JUDGE
+    freopen("in.txt", "rt", stdin);
+    // freopen("in.txt", "wt" , stdout);
+#endif
+    cin>>n;
+    map<int,int> belongsTo,cnt;
+    vector<int> st;
+    vector<int> ans;
+    loop(i,n){
+        cin>>arr[i];
+        if(cnt[arr[i]]==3){
+            belongsTo[arr[i]]=arr[i];
+        }
+        if(belongsTo[arr[i]]){
+            ans.push_back(belongsTo[arr[i]]);
+            ans.push_back(arr[i]);
+            ans.push_back(belongsTo[arr[i]]);
+            ans.push_back(arr[i]);
+            belongsTo.clear();
+            cnt.clear();
+            st.clear();
+            continue;
+        }
+        if(cnt[arr[i]]){
+            while(!st.empty()){
+                if(st.back()==arr[i]){
+                    st.pop_back();
+                    break;
+                }
+                belongsTo[st.back()]=arr[i];
+                cnt[st.back()]--;
+                st.pop_back();
+            }
+        }
+        st.push_back(arr[i]);
+        cnt[arr[i]]++;
+    }
+    cout<<ans.size()<<endl;
+    for(int x:ans){
+        cout<<x<<" ";
+    }
+    cout<<endl;
+}
