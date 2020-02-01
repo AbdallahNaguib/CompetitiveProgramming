@@ -1,0 +1,99 @@
+#include <bits/stdc++.h>
+
+#define ll long long
+#define lst(x) x.size()-1
+#define ld long double
+#define pr pair<int,int>
+#define loop(i, n) for(int i=0 ; i<n ; ++i)
+#define rep(i, x, n) for(int i=x ; i<=n ; ++i)
+#define iteloop(type, data, name, it) for(type<data>::iterator it=name.begin() ;it!=name.end() ; ++it)
+
+using namespace std;
+
+const int N = 5e5 + 5, M = 1e6+5 , C=1e3 +5, MOD = 1e9 + 7, OO = 1e9;
+int revenue[N],n,k;
+ll seg[M],lazy[M];
+
+ll query(int qs,int qe,int st=0,int en=n-1,int si=0){
+    if(qe<qs)return 0;
+    if(lazy[si]){
+        seg[si]+=lazy[si];
+        if(st!=en){
+            lazy[si*2+1]+=lazy[si];
+            lazy[si*2+2]+=lazy[si];
+        }
+        lazy[si]=0;
+    }
+    if(qs<=st && qe>=en){
+        return seg[si];
+    }
+    if(qs>en || qe<st)return 0;
+    int mid=(st+en)/2;
+    return max(query(qs,qe,st,mid,si*2+1),query(qs,qe,mid+1,en,si*2+2));
+}
+void update(int qs,int qe,ll val,int st=0,int en=n-1,int si=0){
+    if(qe<qs)return;
+    if(qs<=st && qe>=en){
+        lazy[si]+=val;
+    }
+    if(lazy[si]){
+        seg[si]+=lazy[si];
+        if(st!=en){
+            lazy[si*2+1]+=lazy[si];
+            lazy[si*2+2]+=lazy[si];
+        }
+        lazy[si]=0;
+    }
+    if(qs<=st && qe>=en)return;
+    if(qs>en || qe<st)return;
+    int mid=(st+en)/2;
+    update(qs,qe,val,st,mid,si*2+1);
+    update(qs,qe,val,mid+1,en,si*2+2);
+    seg[si]=max(seg[si*2+1],seg[si*2+2]);
+}
+ll sol[N];
+ll billboards(int k,vector<int> &vec) {
+    memset(lazy,0,sizeof(lazy));
+    memset(sol,0,sizeof(sol));
+    memset(seg,0,sizeof(seg));
+    n=vec.size();
+    ll sum=0;
+    ll mn=3e9;
+    for(int i=n-1 ; i>=n-k ; --i){
+        sum+=vec[i];
+        sol[i]=sum;
+        update(i,i,sum);
+        mn=min(mn,(ll)vec[i]);
+    }
+    sol[n-k-1]=max(sol[n-k],vec[n-k-1]+sol[n-k]-mn);
+    update(n-k-1,n-k-1,sol[n-k-1]);
+    int dpPt=n-k+2;
+    int xPt=n-k;
+    sum=0;
+    while(dpPt<n){
+        sum+=vec[xPt];
+        update(dpPt,dpPt,sum);
+        xPt++;
+        dpPt++;
+    }
+    for(int i=n-k-2 ; i>=0 ; --i){
+        update(i+3,n-1,vec[i+1]);
+        sol[i]=max(sol[i+1],vec[i]+query(i+2,i+2+k-1));
+        update(i,i,sol[i]);
+    }
+    return sol[0];
+}
+
+int main() {
+    cin.sync_with_stdio(false), cin.tie(0), cout.tie(0);
+#ifndef ONLINE_JUDGE
+ //   freopen("in.txt", "rt", stdin);
+    // freopen("in.txt", "wt" , stdout);
+#endif
+    cin>>n>>k;
+    vector<int> vec(n);
+    loop(i,n){
+        cin>>vec[i];
+    }
+    cout<<billboards(k,vec)<<endl;
+}
