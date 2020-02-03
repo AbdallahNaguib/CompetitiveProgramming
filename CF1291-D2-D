@@ -1,0 +1,54 @@
+#include <bits/stdc++.h>
+
+#define ll long long
+#define lst(x) x.size()-1
+#define ld long double
+#define pr pair<int,int>
+#define loop(i, n) for(int i=0 ; i<n ; ++i)
+#define rep(i, x, n) for(int i=x ; i<=n ; ++i)
+#define iteloop(type, data, name, it) for(type<data>::iterator it=name.begin() ;it!=name.end() ; ++it)
+
+using namespace std;
+
+const int N = 1e6 + 5, M = 1e6+5 , C=1e3 +5, MOD = 1e9 + 7, OO = 1e9+5;
+int fre[N][30];
+int main() {
+    cin.sync_with_stdio(false), cin.tie(0), cout.tie(0);
+#ifndef ONLINE_JUDGE
+    freopen("in.txt", "rt", stdin);
+    // freopen("in.txt", "wt" , stdout);
+#endif
+    string str;
+    cin>>str;
+    int q;
+    cin>>q;
+    int n=str.size();
+    loop(i,n){
+        if(i)
+        loop(j,26){
+            if(j+'a'==str[i]){
+                fre[i][j]=fre[i-1][j]+1;
+            }else{
+                fre[i][j]=fre[i-1][j];
+            }
+        }
+        else
+            fre[i][str[i]-'a']++;
+    }
+    loop(i,q){
+        int l,r;
+        cin>>l>>r;
+        l--;r--;
+        int chrs=0;
+        loop(j,26){
+            int f=fre[r][j];
+            if(l)f-=fre[l-1][j];
+            if(f)chrs++;
+        }
+        if(chrs>2 || l-r==0 || (chrs == 2 && str[l]!=str[r])){
+            cout<<"Yes"<<endl;
+        }else{
+            cout<<"No"<<endl;
+        }
+    }
+}
