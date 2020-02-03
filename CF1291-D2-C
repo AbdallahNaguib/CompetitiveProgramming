@@ -1,0 +1,53 @@
+#include <bits/stdc++.h>
+
+#define ll long long
+#define lst(x) x.size()-1
+#define ld long double
+#define pr pair<int,int>
+#define loop(i, n) for(int i=0 ; i<n ; ++i)
+#define rep(i, x, n) for(int i=x ; i<=n ; ++i)
+#define iteloop(type, data, name, it) for(type<data>::iterator it=name.begin() ;it!=name.end() ; ++it)
+
+using namespace std;
+
+const int N = 4e3 + 5, M = 1e6+5 , C=1e3 +5, MOD = 1e9 + 7, OO = 1e9+5;
+int n,m,k,arr[N],mx[N];
+int main() {
+    cin.sync_with_stdio(false), cin.tie(0), cout.tie(0);
+#ifndef ONLINE_JUDGE
+    freopen("in.txt", "rt", stdin);
+    // freopen("in.txt", "wt" , stdout);
+#endif
+    int t;
+    cin>>t;
+    while(t--){
+        cin>>n>>m>>k;
+        loop(i,n) {
+            cin >> arr[i];
+        }
+        m--;
+        int pt1=0;
+        int pt2=n-m-1;
+        int best=0;
+        while(pt2<n){
+            mx[pt1]=max(arr[pt1],arr[pt2]);
+            best=max(best,mx[pt1]);
+            pt1++;pt2++;
+        }
+        if(k>=m){
+            cout<<best<<endl;
+            continue;
+        }
+        int res=0;
+        loop(i,k+1){
+            int mn=OO;
+            loop(j,m-k+1){
+                int ind=i+j;
+                mn=min(mx[ind],mn);
+            }
+          //  cout<<"mn "<<mn<<endl;
+            res=max(res,mn);
+        }
+        cout<<res<<endl;
+    }
+}
