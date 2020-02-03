@@ -1,0 +1,55 @@
+#include <bits/stdc++.h>
+
+#define ll long long
+#define lst(x) x.size()-1
+#define ld long double
+#define pr pair<int,int>
+#define loop(i, n) for(int i=0 ; i<n ; ++i)
+#define rep(i, x, n) for(int i=x ; i<=n ; ++i)
+#define iteloop(type, data, name, it) for(type<data>::iterator it=name.begin() ;it!=name.end() ; ++it)
+
+using namespace std;
+
+const int N = 3e5 + 5, M = 1e6+5 , C=1e3 +5, MOD = 1e9 + 7, OO = 1e9;
+int n,arr[N],lft[N],rt[N];
+int main() {
+    cin.sync_with_stdio(false), cin.tie(0), cout.tie(0);
+#ifndef ONLINE_JUDGE
+    freopen("in.txt", "rt", stdin);
+    // freopen("in.txt", "wt" , stdout);
+#endif
+    int t;
+    cin>>t;
+    while(t--){
+        cin>>n;
+        bool ok=false;
+        int lstLft=-1,lstRt=n;
+        bool lftEnd=false,rtEnd=false;
+        loop(i,n) {
+            cin >> arr[i];
+            if(arr[i]>=i){
+                lft[i]=1;
+                if(!lftEnd){
+                    lstLft=i;
+                }
+            }else{
+                lft[i]=0;
+                lftEnd= true;
+            }
+        }
+        int cur=0;
+        for(int i=n-1 ; i>=0 ; --i){
+            if(arr[i]>=cur){
+                rt[i]=1;
+                if(!rtEnd){
+                    lstRt=i;
+                }
+            }else{
+                rt[i]=0;
+                rtEnd= true;
+            }
+            cur++;
+        }
+        cout<<(lstLft>=lstRt?"Yes":"No")<<endl;
+    }
+}
