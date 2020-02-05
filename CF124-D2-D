@@ -1,0 +1,63 @@
+#include <bits/stdc++.h>
+
+#define ll long long
+#define lst(x) x.size()-1
+#define ld long double
+#define pr pair<ll,ll>
+#define loop(i, n) for(ll i=0 ; i<n ; ++i)
+#define rep(i, x, n) for(ll i=x ; i<=n ; ++i)
+#define iteloop(type, data, name, it) for(type<data>::iterator it=name.begin() ;it!=name.end() ; ++it)
+
+using namespace std;
+
+const ll N = 1e6 + 5, M = 1e6+5 , C=1e3+5, MOD = 1e9 + 7, OO = 1e9+5;
+ll a,b,x1,x2,y_1,y2;
+
+ll addLine(ll mul,ll x){
+    return mul*a - x;
+}
+ll subLine(ll mul,ll x){
+    return mul*b + x;
+}
+pr getLines(ll x,ll y){
+    ll st=-OO , en=OO;
+    // get the add line
+    while(st<=en){
+        ll mid=(st+en)/2;
+        if(addLine(mid,x)<y){
+            st=mid+1;
+        }else{
+            en=mid-1;
+        }
+    }
+    pr res;
+    res.first=st-1;
+    st=-OO , en=OO;
+    // get the sub line
+    while(st<=en){
+        ll mid=(st+en)/2;
+        if(subLine(mid,x)<y){
+            st=mid+1;
+        }else{
+            en=mid-1;
+        }
+    }
+    res.second=st-1;
+    return res;
+}
+
+int main() {
+    cin.sync_with_stdio(false), cin.tie(0), cout.tie(0);
+#ifndef ONLINE_JUDGE
+    freopen("in.txt", "rt", stdin);
+    // freopen("in.txt", "wt" , stdout);
+#endif
+    cin>>a>>b>>x1>>y_1>>x2>>y2;
+    a*=2;
+    b*=2;
+    pr pt1=getLines(x1,y_1);
+    pr pt2=getLines(x2,y2);
+    ll diff1=abs(pt1.first-pt2.first);
+    ll diff2=abs(pt1.second-pt2.second);
+    cout<<max(diff1,diff2)<<endl;
+}
