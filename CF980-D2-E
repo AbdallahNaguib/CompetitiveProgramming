@@ -1,0 +1,84 @@
+#include <bits/stdc++.h>
+
+#define ll long long
+#define lst(x) x.size()-1
+#define ld long double
+#define pr pair<ll,ll>
+#define loop(i, n) for(ll i=0 ; i<n ; ++i)
+#define rep(i, x, n) for(ll i=x ; i<=n ; ++i)
+#define iteloop(type, data, name, it) for(type<data>::iterator it=name.begin() ;it!=name.end() ; ++it)
+
+using namespace std;
+
+const ll N = 1e6 + 5, M = 25 ,PAR=22, C=1e3+5, MOD = 1e9 + 7, OO = 1e9+5;
+int n,k;
+vector<int> graph[N];
+int lvl[N];
+int parents[N][M];
+
+void dfs(int u=n,int p=-1){
+    parents[u][0]=p;
+    if(p==-1){
+        lvl[u]=1;
+    }else{
+        lvl[u]=lvl[p]+1;
+    }
+    for(int v:graph[u]){
+        if(v==p)continue;
+        dfs(v,u);
+    }
+}
+bool taken[N];
+int dist(int u){
+    if(taken[u])return 0;
+    int x=u;
+    for(int i=PAR ; i>=0 ; i--){
+        if(parents[x][i]==-1)continue;
+        if(!taken[parents[x][i]]){
+            x=parents[x][i];
+        }
+    }
+    x=parents[x][0];
+    return lvl[u]-lvl[x];
+}
+void take(int u){
+    if(taken[u])return;
+    taken[u]=1;
+    take(parents[u][0]);
+}
+int main() {
+    cin.sync_with_stdio(false), cin.tie(0), cout.tie(0);
+#ifndef ONLINE_JUDGE
+    freopen("in.txt", "rt", stdin);
+    // freopen("in.txt", "wt" , stdout);
+#endif
+    cin>>n>>k;
+    loop(i,n-1){
+        int u,v;
+        cin>>u>>v;
+        graph[u].push_back(v);
+        graph[v].push_back(u);
+    }
+    taken[n]=1;
+    dfs();
+    rep(i,1,PAR){
+        rep(u,1,n){
+            if(parents[u][i-1]==-1){
+                parents[u][i]=-1;
+            }else
+                parents[u][i]=parents[parents[u][i-1]][i-1];
+        }
+    }
+    k=n-k-1;
+    for(int u=n-1 ; u>0; u--){
+        int dst=dist(u);
+        if(dst<=k){
+            k-=dst;
+            take(u);
+        }
+    }
+    rep(i,1,n){
+        if(!taken[i])cout<<i<<" ";
+    }
+    cout<<endl;
+}
