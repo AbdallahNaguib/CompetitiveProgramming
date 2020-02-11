@@ -1,0 +1,80 @@
+#include <bits/stdc++.h>
+
+#define ll long long
+#define lst(x) x.size()-1
+#define ld long double
+#define pr pair<ll,ll>
+#define loop(i, n) for(ll i=0 ; i<n ; ++i)
+#define rep(i, x, n) for(ll i=x ; i<=n ; ++i)
+#define iteloop(type, data, name, it) for(type<data>::iterator it=name.begin() ;it!=name.end() ; ++it)
+
+using namespace std;
+
+const ll N = 2e5 + 10; // make sure is greater than max_node will ever be
+const ll LVL=60;
+ll add[LVL+5];
+ll q,t,k,x;
+ll pow2[LVL+5];
+ll getInd(ll val){
+    ll lvl=log2(val);
+    ll initInd=val-pow2[lvl];
+    ll curInd=initInd+add[lvl];
+    curInd%=pow2[lvl];
+    return curInd;
+}
+ll getNumInInd(ll ind,ll lvl){
+    ind=ind-add[lvl]+pow2[lvl];
+    ind%=pow2[lvl];
+    return pow2[lvl]+ind;
+}
+int main() {
+    cin.sync_with_stdio(false), cin.tie(0), cout.tie(0);
+#ifndef ONLINE_JUDGE
+    freopen("in.txt", "rt", stdin);
+    // freopen("in.txt", "wt" , stdout);
+#endif
+    pow2[0]=1;
+    rep(i,1,LVL+1){
+        pow2[i]=pow2[i-1]*2;
+    }
+
+    cin>>q;
+    loop(i,q){
+        cin>>t;
+        if(t==1){
+            cin>>x>>k;
+            ll lvl=log2(x);
+            if(k<0){
+                k%=pow2[lvl];
+                k+=pow2[lvl];
+                k%=pow2[lvl];
+            }
+            add[lvl]+=k%pow2[lvl];
+            add[lvl]%=pow2[lvl];
+        }else if(t==2){
+            cin>>x>>k;
+            ll lvl=log2(x);
+            if(k<0){
+                k%=pow2[lvl];
+                k+=pow2[lvl];
+                k%=pow2[lvl];
+            }
+            k=k%pow2[lvl];
+            rep(j,lvl,LVL){
+                add[j]+=k%pow2[j];
+                add[j]%=pow2[j];
+                k*=2;
+            }
+        }else{
+            cin>>x;
+            ll curInd=getInd(x);
+            ll lvl=log2(x);
+            cout<<x<<" ";
+            while(lvl--){
+                curInd/=2;
+                cout<<getNumInInd(curInd,lvl)<<" ";
+            }
+            cout<<endl;
+        }
+    }
+}
