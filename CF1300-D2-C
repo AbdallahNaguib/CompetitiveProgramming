@@ -1,0 +1,42 @@
+#include <bits/stdc++.h>
+
+#define ll long long
+#define lst(x) x.size()-1
+#define ld long double
+#define pr pair<ll,ll>
+#define loop(i, n) for(ll i=0 ; i<n ; ++i)
+#define rep(i, x, n) for(ll i=x ; i<=n ; ++i)
+#define iteloop(type, data, name, it) for(type<data>::iterator it=name.begin() ;it!=name.end() ; ++it)
+
+using namespace std;
+
+const ll N = 2e5 + 10; // make sure is greater than max_node will ever be
+int arr[N],n;
+vector<int> fre[40];
+int main() {
+    cin.sync_with_stdio(false), cin.tie(0), cout.tie(0);
+#ifndef ONLINE_JUDGE
+    freopen("in.txt", "rt", stdin);
+    // freopen("in.txt", "wt" , stdout);
+#endif
+    cin>>n;
+    loop(i,n){
+        cin>>arr[i];
+        for(ll j=0 ; j<40; j++){
+            if(arr[i]&(1ll<<j))fre[j].push_back(i);
+        }
+    }
+    int ind=0;
+    for(int i=39 ; i>=0 ; i--){
+        if(fre[i].size()==1){
+            ind=fre[i][0];
+            break;
+        }
+    }
+    cout<<arr[ind]<<" ";
+    loop(i,n){
+        if(i==ind)continue;
+        cout<<arr[i]<<" ";
+    }
+    cout<<endl;
+}
