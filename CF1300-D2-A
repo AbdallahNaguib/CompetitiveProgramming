@@ -1,0 +1,37 @@
+#include <bits/stdc++.h>
+
+#define ll long long
+#define lst(x) x.size()-1
+#define ld long double
+#define pr pair<ll,ll>
+#define loop(i, n) for(ll i=0 ; i<n ; ++i)
+#define rep(i, x, n) for(ll i=x ; i<=n ; ++i)
+#define iteloop(type, data, name, it) for(type<data>::iterator it=name.begin() ;it!=name.end() ; ++it)
+
+using namespace std;
+
+const ll N = 2e4 + 10; // make sure is greater than max_node will ever be
+int arr[N];
+int main() {
+    cin.sync_with_stdio(false), cin.tie(0), cout.tie(0);
+#ifndef ONLINE_JUDGE
+    freopen("in.txt", "rt", stdin);
+    // freopen("in.txt", "wt" , stdout);
+#endif
+    int t;
+    cin>>t;
+    while(t--){
+        int sum=0,steps=0,n;
+        cin>>n;
+        loop(i,n){
+            cin>>arr[i];
+            if(arr[i]==0){
+                arr[i]=1;
+                steps++;
+            }
+            sum+=arr[i];
+        }
+        if(sum==0)steps++;
+        cout<<steps<<endl;
+    }
+}
