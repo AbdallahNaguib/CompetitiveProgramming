@@ -1,0 +1,88 @@
+#include <bits/stdc++.h>
+#include <ext/pb_ds/assoc_container.hpp>
+#define loop(i,n) for(ll i=0 ; i<n ; i++)
+#define rep(i,x,n) for(ll i=x ; i<=n ; i++)
+#define PI 3.141592654
+using namespace std;
+using namespace __gnu_pbds;
+typedef long long ll;
+template<typename T>
+using ordered_set = tree<T, null_type, less<T>, rb_tree_tag, tree_order_statistics_node_update>;
+const ll N=1e2 + 5,M=1e5+5, MOD=1e9 + 7 , MAX=5e6;
+
+ll memo[N],n,fre[N],x;
+
+struct matrix{
+    ll mat[N][N];
+    ll sz=101;
+    matrix operator*(matrix mat2){
+        matrix res;
+        loop(i,sz){
+            loop(j,sz){
+                res.mat[i][j]=0;
+                loop(k,sz){
+                    res.mat[i][j]+=this->mat[i][k]*mat2.mat[k][j];
+                    res.mat[i][j]%=MOD;
+                }
+            }
+        }
+        return res;
+    }
+};
+
+matrix power(matrix& mat,ll p){
+    if(p==1)return mat;
+    matrix par1=mat*mat;
+    matrix res=power(par1,p/2);
+    if(p&1){
+        res=res*mat;
+    }
+    return res;
+}
+int main() {
+#ifndef ONLINE_JUDGE
+    freopen("in.txt", "rt", stdin);
+#endif
+    ios_base::sync_with_stdio(0), cin.tie(0), cout.tie(0);
+    matrix mt;
+    memset(mt.mat,0,sizeof(mt.mat));
+    cin>>n>>x;
+    loop(i,n){
+        ll any;
+        cin>>any;
+        fre[any]++;
+    }
+    memo[0]=1;
+    rep(i,1,N-5){
+        memo[i]=1;
+        rep(j,1,N-5){
+            ll diff=i-j;
+            if(diff>=0){
+                memo[i]+=fre[j]*memo[diff];
+                memo[i]%=MOD;
+            }
+        }
+    }
+    if(x<=100){
+        cout<<memo[x]<<endl;
+        return 0;
+    }
+    mt.mat[0][0]=1;
+    rep(i,1,99){
+        mt.mat[i][i+1]=1;
+    }
+    int len=mt.sz-1;
+    mt.mat[len][0]=1;
+    int ind=len;
+    rep(i,1,len){
+        mt.mat[len][i]=fre[ind--];
+    }
+
+    matrix res=power(mt,x-100);
+    ll ans=res.mat[len][0];
+    rep(i,1,len){
+        ans+=res.mat[len][i]*memo[i];
+        ans%=MOD;
+    }
+    cout<<ans<<endl;
+}
