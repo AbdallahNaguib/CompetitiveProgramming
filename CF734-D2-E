@@ -1,0 +1,72 @@
+#include <bits/stdc++.h>
+#include <ext/pb_ds/assoc_container.hpp>
+
+#define pr pair<int,int>
+#define loop(i,n) for(ll i=0 ; i<n ; i++)
+#define rep(i,x,n) for(ll i=x ; i<=n ; i++)
+#define PI 3.141592654
+using namespace std;
+using namespace __gnu_pbds;
+typedef long long ll;
+template<typename T>
+using ordered_set = tree<T, null_type, less<T>, rb_tree_tag, tree_order_statistics_node_update>;
+const int N=2e5 + 5,M=1e5+5, MOD=1e9 + 7 , OO=2e9;
+
+vector<int> graph[N],graph2[N];
+int n,color[N];
+int par[N];
+
+void getPar(int u=1,int p=-1){
+    par[u]=p;
+    for(int v:graph[u]){
+        if(v==p)continue;
+        getPar(v,u);
+    }
+}
+void anotherPar(int u=1,int p=-1,int frst=1){
+    if(u!=1){
+        if(color[u]!=color[p]){
+            graph2[frst].push_back(u);
+            graph2[u].push_back(frst);
+            par[u]=frst;
+            frst=u;
+        }
+    }
+    for(int v:graph[u]){
+        if(v==p)continue;
+        anotherPar(v,u,frst);
+    }
+}
+pr dfs(int u=1,int p=-1){
+    pr res={0,u};
+    for(int v:graph2[u]){
+        if(v==p)continue;
+        pr x=dfs(v,u);
+        x.first+=1;
+        if(x.first>res.first){
+            res=x;
+        }
+    }
+    return res;
+}
+int main() {
+#ifndef ONLINE_JUDGE
+    freopen("in.txt", "rt", stdin);
+#endif
+    ios_base::sync_with_stdio(0), cin.tie(0), cout.tie(0);
+    cin>>n;
+    rep(i,1,n){
+        cin>>color[i];
+    }
+    loop(i,n-1){
+        int u,v;
+        cin>>u>>v;
+        graph[u].push_back(v);
+        graph[v].push_back(u);
+    }
+    getPar();
+    anotherPar();
+    pr d=dfs();
+    int ans=dfs(d.second).first;
+    cout<<(ans+1)/2<<endl;
+}
