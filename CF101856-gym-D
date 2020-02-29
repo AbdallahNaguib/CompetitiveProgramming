@@ -1,0 +1,89 @@
+#include <bits/stdc++.h>
+#include <ext/pb_ds/assoc_container.hpp>
+
+#define pr pair<int,int>
+#define loop(i,n) for(ll i=0 ; i<n ; i++)
+#define rep(i,x,n) for(ll i=x ; i<=n ; i++)
+#define PI 3.141592654
+
+using namespace std;
+using namespace __gnu_pbds;
+
+typedef long long ll;
+template<typename T>
+using ordered_set = tree<T, null_type, less<T>, rb_tree_tag, tree_order_statistics_node_update>;
+
+const int N=1e5 + 5,M=1e5+5, MOD=1e9 + 7 , OO=2e9;
+
+int par[N];
+vector<int> divs[N];
+int cmpSize[N],n;
+
+int getPar(int x){
+    if(par[x]==x)return x;
+    return par[x]=getPar(par[x]);
+}
+void unify(int x,int y){
+    int parX=getPar(x);
+    int parY=getPar(y);
+    if(parX==parY)return;
+    if(cmpSize[parX]>cmpSize[parY]){
+        cmpSize[parX]+=cmpSize[parY];
+        par[parY]=parX;
+    }else{
+        cmpSize[parY]+=cmpSize[parX];
+        par[parX]=parY;
+    }
+}
+
+
+void init(){
+    loop(i,N){
+        divs[i].clear();
+    }
+    memset(cmpSize,0,sizeof(cmpSize));
+    loop(i,N){
+        par[i]=i;
+    }
+}
+
+int main() {
+#ifndef ONLINE_JUDGE
+    freopen("in.txt", "rt", stdin);
+#endif
+   // ios_base::sync_with_stdio(0), cin.tie(0), cout.tie(0);
+    int t;
+    scanf("%d",&t);
+    int tst=0;
+    while(t--){
+        tst++;
+        scanf("%d",&n);
+        init();
+        loop(i,n){
+            int x;
+            scanf("%d",&x);
+            for(int j=1 ; j*j<=x ; j++){
+                if(x%j==0){
+                    divs[j].push_back(i);
+                    divs[x/j].push_back(i);
+                }
+                if(j*j==x)divs[j].pop_back();
+            }
+        }
+        ll res=0;
+        for(int i=N-1 ; ~i ; i--){
+            for(int j=1 ; j<divs[i].size() ; j++){
+                int x=divs[i][0];
+                int y=divs[i][j];
+                int parX=getPar(x);
+                int parY=getPar(y);
+                if(parX!=parY){
+                    res+=i;
+                  //  cout<<x+1<<" "<<y+1<<endl;
+                    unify(x,y);
+                }
+            }
+        }
+        printf("Case %d: %lld\n",tst,res);
+    }
+}
