@@ -1,0 +1,118 @@
+#include <bits/stdc++.h>
+#include <ext/pb_ds/assoc_container.hpp>
+
+#define pr pair<int,int>
+#define loop(i,n) for(ll i=0 ; i<n ; i++)
+#define rep(i,x,n) for(ll i=x ; i<=n ; i++)
+#define PI 3.141592654
+
+using namespace std;
+using namespace __gnu_pbds;
+
+typedef long long ll;
+template<typename T>
+using ordered_set = tree<T, null_type, less<T>, rb_tree_tag, tree_order_statistics_node_update>;
+
+const int N=1e5 + 5,M=20, MOD=1e9 + 7 , OO=2e9;
+struct node{
+    bool num;
+    int mn=1e9;
+    pair<node*,node*> childs;
+    node(){};
+    node(bool nm):num(nm){}
+};
+node* arr[N];
+int pow2[M];
+void add(int k,int num){
+    node* cur=arr[k];
+    int num2=num;
+    for(int i=M-1 ; ~i ; --i){
+        cur->mn = min(cur->mn,num2);
+        if(num>=pow2[i]){
+            if(cur->childs.second== nullptr){
+                cur->childs.second = new node(1);
+            }
+            cur = cur->childs.second;
+            num-=pow2[i];
+        }else{
+            if(cur->childs.first== nullptr){
+                cur->childs.first = new node(0);
+            }
+            cur = cur->childs.first;
+        }
+    }
+    cur->mn = min(cur->mn,num2);
+}
+int query(int k,int num,int mx){
+    node* cur=arr[k];
+    for(int i=M-1 ; ~i ; --i){
+        if(cur->childs.first == nullptr && cur->childs.second == nullptr){
+            return -1;
+        }
+        if(num>=pow2[i]){
+            // then take the 0 side
+            if(cur->childs.first != nullptr){
+                if(cur->childs.first->mn > mx){
+                    cout<<cur->childs.first->mn<<endl;
+                    return -1;
+                }
+                cur = cur->childs.first;
+            }else{
+                // I have to take the 1 side
+                if(cur->childs.second->mn > mx)return -1;
+                cur = cur->childs.second;
+            }
+            num-=pow2[i];
+        }else{
+            // then take the 1 side
+            if(cur->childs.second != nullptr && cur->childs.second->mn <= mx){
+                cur = cur->childs.second;
+            }else if(cur->childs.first->mn <= mx){
+                cur = cur->childs.first;
+            }else{
+                return -1;
+            }
+        }
+    }
+    return cur->mn;
+}
+int main() {
+#ifndef ONLINE_JUDGE
+    freopen("in.txt", "rt", stdin);
+#endif
+    ios_base::sync_with_stdio(0), cin.tie(0), cout.tie(0);
+    pow2[0]=1;
+    rep(i,1,M-1){
+        pow2[i]=pow2[i-1]*2;
+    }
+    loop(i,N){
+        arr[i]=new node();
+    }
+    int t;
+    cin>>t;
+    while(t--){
+        int type;
+        cin>>type;
+        if(type==1){
+            int u;
+            cin>>u;
+            for(int i=1 ; i*i<=u ; i++){
+                if(u%i==0) {
+                    add(i,u);
+                    int div = u / i;
+                    if(div!=i){
+                        add(div,u);
+                    }
+                }
+            }
+        }else{
+            int x,k,s;
+            cin>>x>>k>>s;
+            if(x%k != 0){
+                cout<<-1<<endl;
+                continue;
+            }
+            cout<<query(k,x,s-x)<<endl;
+        }
+    }
+}
