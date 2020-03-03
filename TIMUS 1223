@@ -1,0 +1,39 @@
+#include <bits/stdc++.h>
+#include <ext/pb_ds/assoc_container.hpp>
+
+#define pr pair<int,int>
+#define loop(i,n) for(ll i=0 ; i<n ; i++)
+#define rep(i,x,n) for(ll i=x ; i<=n ; i++)
+#define PI 3.141592654
+
+using namespace std;
+using namespace __gnu_pbds;
+
+typedef long long ll;
+template<typename T>
+using ordered_set = tree<T, null_type, less<T>, rb_tree_tag, tree_order_statistics_node_update>;
+
+const int N=1e3 + 5,M=1e3+5, MOD=1e9 + 7 , OO=2e9;
+
+ll memo[N][N];
+
+int main() {
+#ifndef ONLINE_JUDGE
+    freopen("in.txt", "rt", stdin);
+#endif
+    ios_base::sync_with_stdio(0), cin.tie(0), cout.tie(0);
+    rep(i,1,1000){
+        rep(j,1,1000){
+            memo[i][j]=memo[i-1][j-1]+memo[i-1][j]+1;
+        }
+    }
+    int n,m;
+    while(cin>>n>>m && n){
+        rep(i,1,1000){
+            if(memo[i][n] >= m){
+                cout<<i<<endl;
+                break;
+            }
+        }
+    }
+}
