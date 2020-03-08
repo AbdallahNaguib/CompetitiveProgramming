@@ -1,0 +1,40 @@
+#include <bits/stdc++.h>
+#include <ext/pb_ds/assoc_container.hpp>
+
+#define pr pair<int,int>
+#define loop(i,n) for(int i=0 ; i<n ; i++)
+#define rep(i,x,n) for(int i=x ; i<=n ; i++)
+#define PI 3.141592654
+
+using namespace std;
+using namespace __gnu_pbds;
+
+typedef long long ll;
+template<typename T>
+using ordered_set = tree<T, null_type, less<T>, rb_tree_tag, tree_order_statistics_node_update>;
+
+const int N=1e5 + 5,M=20, MOD=1e9 + 7 , OO=2e9;
+
+int main() {
+#ifndef ONLINE_JUDGE
+    // freopen("in.txt", "rt", stdin);
+    // freopen("out.txt", "wt", stdout);
+#endif
+    ios_base::sync_with_stdio(0), cin.tie(0), cout.tie(0);
+    int n;
+    cin>>n;
+    n++;
+    std::default_random_engine generator;
+    rep(x,2,n){
+        int x2=x;
+        while(x2>=2){
+            rep(i,2,x2){
+                cout<<"? "<<i-1<<" "<<i<<endl;
+            }
+            x2--;
+        }
+        std::uniform_int_distribution<int> distribution(1,x - 1);
+        int a = distribution(generator);
+        cout << "! " << a << " " << (a + 1) << "\n";
+    }
+}
