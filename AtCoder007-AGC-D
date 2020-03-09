@@ -1,0 +1,209 @@
+#include <bits/stdc++.h>
+#include <ext/pb_ds/assoc_container.hpp>
+#include <unistd.h>
+
+
+#define ll long long
+#define lst(x) x.size()-1
+#define ld long double
+#define pr pair<ll,ll>
+#define loop(i,n) for(ll i=0 ; i<n ; ++i)
+#define rep(i,x,n) for(ll i=x ; i<=n ; ++i)
+#define iteloop(type,data,name,it) for(type<data>::iterator it=name.begin() ;it!=name.end() ; ++it)
+
+using namespace __gnu_pbds;
+using namespace std;
+
+template<typename T>
+using os = tree<T, null_type, less<T>, rb_tree_tag,
+        tree_order_statistics_node_update>;
+
+const ll N=1e5+5,M=1e1+5,MOD=1e9+7,INF=1e18;
+
+ll pos[N],n,t,e;
+ll memo[N];
+ll seg1[4*N] ;  // To store segment seg1
+ll lazy1[4*N] ;  // To store pending updates
+
+void updateRangeUtil(ll si, ll ss, ll se, ll us,
+                     ll ue, ll diff){
+
+    if (lazy1[si] != 0){
+        seg1[si] += lazy1[si];
+        if (ss != se){
+            lazy1[si*2 + 1]   += lazy1[si];
+            lazy1[si*2 + 2]   += lazy1[si];
+        }
+        lazy1[si] = 0;
+    }
+    if (ss>se || ss>ue || se<us)
+        return ;
+    if (ss>=us && se<=ue){
+        seg1[si] += diff;
+        if (ss != se){
+            lazy1[si*2 + 1]   += diff;
+            lazy1[si*2 + 2]   += diff;
+        }
+        return;
+    }
+    ll mid = (ss+se)/2;
+    updateRangeUtil(si*2+1, ss, mid, us, ue, diff);
+    updateRangeUtil(si*2+2, mid+1, se, us, ue, diff);
+    seg1[si] = min(seg1[si*2+1] , seg1[si*2+2]);
+}
+
+void updateRange(ll us, ll ue, ll diff){
+    updateRangeUtil(0, 0, n-1, us, ue, diff);
+}
+
+ll getMinUtil(ll ss, ll se, ll qs, ll qe, ll si){
+    if (lazy1[si] != 0){
+        seg1[si] += lazy1[si];
+        if (ss != se){
+            lazy1[si*2+1] += lazy1[si];
+            lazy1[si*2+2] += lazy1[si];
+        }
+        lazy1[si] = 0;
+    }
+
+    if (ss>se || ss>qe || se<qs)
+        return INF;
+
+    if (ss>=qs && se<=qe)
+        return seg1[si];
+    ll mid = (ss + se)/2;
+    return min(getMinUtil(ss, mid, qs, qe, 2*si+1),
+           getMinUtil(mid+1, se, qs, qe, 2*si+2));
+}
+ll getMin( ll qs, ll qe){
+    if (qs < 0 || qe > n-1 || qs > qe){
+        return INF;
+    }
+
+    return getMinUtil(0, n-1, qs, qe, 0);
+}
+void constructST(){
+    memset(seg1,0,sizeof(seg1));
+    memset(lazy1,0,sizeof(lazy1));
+}
+
+
+
+
+
+
+
+
+ll seg2[4*N] ;  // To store segment seg1
+ll lazy2[4*N] ;  // To store pending updates
+
+void updateRangeUtil2(ll si, ll ss, ll se, ll us,
+                     ll ue, ll diff){
+
+    if (lazy2[si] != 0){
+        seg2[si] += lazy2[si];
+        if (ss != se){
+            lazy2[si*2 + 1]   += lazy2[si];
+            lazy2[si*2 + 2]   += lazy2[si];
+        }
+        lazy2[si] = 0;
+    }
+    if (ss>se || ss>ue || se<us)
+        return ;
+    if (ss>=us && se<=ue){
+        seg2[si] += diff;
+        if (ss != se){
+            lazy2[si*2 + 1]   += diff;
+            lazy2[si*2 + 2]   += diff;
+        }
+        return;
+    }
+    ll mid = (ss+se)/2;
+    updateRangeUtil2(si*2+1, ss, mid, us, ue, diff);
+    updateRangeUtil2(si*2+2, mid+1, se, us, ue, diff);
+    seg2[si] = min(seg2[si*2+1] , seg2[si*2+2]);
+}
+
+void updateRange2(ll us, ll ue, ll diff){
+    updateRangeUtil2(0, 0, n-1, us, ue, diff);
+}
+
+ll getMinUtil2(ll ss, ll se, ll qs, ll qe, ll si){
+    if (lazy2[si] != 0){
+        seg2[si] += lazy2[si];
+        if (ss != se){
+            lazy2[si*2+1] += lazy2[si];
+            lazy2[si*2+2] += lazy2[si];
+        }
+        lazy2[si] = 0;
+    }
+
+    if (ss>se || ss>qe || se<qs)
+        return INF;
+
+    if (ss>=qs && se<=qe)
+        return seg2[si];
+    ll mid = (ss + se)/2;
+    return min(getMinUtil2(ss, mid, qs, qe, 2*si+1) ,
+           getMinUtil2(mid+1, se, qs, qe, 2*si+2));
+}
+ll getMin2( ll qs, ll qe){
+    if (qs < 0 || qe > n-1 || qs > qe){
+        return INF;
+    }
+
+    return getMinUtil2(0, n-1, qs, qe, 0);
+}
+void constructST2(){
+    memset(seg2,0,sizeof(seg2));
+    memset(lazy2,0,sizeof(lazy2));
+}
+int main(){
+    cin.sync_with_stdio(false), cin.tie(0) , cout.tie(0);
+#ifndef ONLINE_JUDGE
+    freopen("in.txt", "rt" , stdin);
+    // freopen("in.txt", "wt" , stdout);
+#endif
+    cin>>n>>e>>t;
+    loop(i,n){
+        cin>>pos[i];
+    }
+    pos[n]=e;
+    memo[0]=t;
+
+    constructST();
+    constructST2();
+
+    // seg1 = dp
+    // seg2 = dp + aj-ai
+
+    updateRange(0,0,t);
+    updateRange2(0,0,t);
+
+    rep(i,1,n-1){
+        ll st=0,en=i-1;
+        while(st<=en){
+            ll mid=(st+en)/2;
+            if(2*(pos[i]-pos[mid+1])>t){
+                st=mid+1;
+            }else{
+                en=mid-1;
+            }
+        }
+        memo[i]=getMin2(0,st-1);
+       //  to decide if it's better to return to the begining
+        memo[i]=min(memo[i],(ll)max(t,2*(pos[i]-pos[0])));
+
+
+        memo[i]=min(memo[i],getMin(st,i-1)+t);
+
+
+        memo[i]=min(memo[i],t+memo[i-1]);
+
+
+        updateRange2(0,i-1,2*(pos[i+1]-pos[i]));
+        updateRange2(i,i,memo[i]);
+        updateRange(i,i,memo[i]);
+    }
+    cout<<memo[n-1]+e<<endl;
+}
