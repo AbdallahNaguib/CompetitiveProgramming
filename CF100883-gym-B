@@ -1,0 +1,46 @@
+#include <bits/stdc++.h>
+#include <ext/pb_ds/assoc_container.hpp>
+#include <unistd.h>
+
+
+#define ll long long
+#define lst(x) x.size()-1
+#define ld long double
+#define pr pair<ll,ll>
+#define loop(i,n) for(ll i=0 ; i<n ; ++i)
+#define rep(i,x,n) for(ll i=x ; i<=n ; ++i)
+#define iteloop(type,data,name,it) for(type<data>::iterator it=name.begin() ;it!=name.end() ; ++it)
+
+using namespace __gnu_pbds;
+using namespace std;
+
+template<typename T>
+using os = tree<T, null_type, less<T>, rb_tree_tag,
+        tree_order_statistics_node_update>;
+
+const int N=2e3+5,M=1e1+5,MOD=1e9+7,OO=1e9,INF=1e9;
+
+
+int main(){
+    cin.sync_with_stdio(false), cin.tie(0) , cout.tie(0);
+#ifndef ONLINE_JUDGE
+    freopen("in.txt", "rt" , stdin);
+    // freopen("in.txt", "wt" , stdout);
+#endif // ONLINE_JUDGE
+    int t;
+    cin>>t;
+    while(t--){
+        int n;
+        cin>>n;
+        int mnX=INF,mnY=INF,mxX=-INF,mxY=-INF;
+        loop(i,4*n){
+            int x,y;
+            cin>>x>>y;
+            mnX=min(mnX,x);
+            mnY=min(mnY,y);
+            mxX=max(mxX,x);
+            mxY=max(mxY,y);
+        }
+        cout<<(mxY-mnY)*(mxX-mnX)<<endl;
+    }
+}
