@@ -1,0 +1,82 @@
+#include <bits/stdc++.h>
+#include <ext/pb_ds/assoc_container.hpp>
+#include <unistd.h>
+
+
+#define ll long long
+#define lst(x) x.size()-1
+#define ld long double
+#define pr pair<ll,ll>
+#define loop(i,n) for(int i=0 ; i<n ; ++i)
+#define rep(i,x,n) for(int i=x ; i<=n ; ++i)
+#define iteloop(type,data,name,it) for(type<data>::iterator it=name.begin() ;it!=name.end() ; ++it)
+
+using namespace __gnu_pbds;
+using namespace std;
+
+template<typename T>
+using os = tree<T, null_type, less<T>, rb_tree_tag,
+        tree_order_statistics_node_update>;
+
+const int N=2e4+5,M=1e4+5,MOD=1e9+7,OO=1e9,INF=1e9;
+
+ll fact[N];
+// C function for extended Euclidean Algorithm (used to
+// find modular inverse.
+ll gcdExtended(ll a, ll b, ll *x, ll *y){
+    // Base Case
+    if (a == 0)
+    {
+        *x = 0, *y = 1;
+        return b;
+    }
+
+    ll x1, y1; // To store results of recursive call
+    ll gcd = gcdExtended(b%a, a, &x1, &y1);
+
+    // Update x and y using results of recursive
+    // call
+    *x = y1 - (b/a) * x1;
+    *y = x1;
+    return gcd;
+
+}
+// Function to find modulo inverse of b. It returns
+// -1 when inverse doesn't
+ll modInverse(ll b, ll m){
+    ll x, y; // used in extended GCD algorithm
+    ll g = gcdExtended(b, m, &x, &y);
+
+    // Return -1 if b and m are not co-prime
+    if (g != 1)
+        return -1;
+
+    // m is added to handle negative x
+    return (x%m + m) % m;
+}
+
+// Function to compute a/b under modlo m
+ll modDivide(ll a, ll b, ll m){
+    a = a % m;
+    ll inv = modInverse(b, m);
+    return (inv * a) % m;
+}
+int main(){
+    cin.sync_with_stdio(false), cin.tie(0) , cout.tie(0);
+#ifndef ONLINE_JUDGE
+    freopen("in.txt", "rt" , stdin);
+    // freopen("in.txt", "wt" , stdout);
+#endif // ONLINE_JUDGE
+    fact[0]=fact[1]=1;
+    rep(i,2,N-1){
+        fact[i]=i*fact[i-1];
+        fact[i]%=MOD;
+    }
+    int t;
+    cin>>t;
+    while(t--){
+        int n,m;
+        cin>>n>>m;
+        cout<<modDivide(fact[n+m],fact[n]*fact[m],MOD)<<endl;
+    }
+}
