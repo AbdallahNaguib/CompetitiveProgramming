@@ -1,0 +1,80 @@
+#include <bits/stdc++.h>
+#include <ext/pb_ds/assoc_container.hpp>
+#include <unistd.h>
+
+
+#define ll long long
+#define lst(x) x.size()-1
+#define ld long double
+#define pr pair<ll,ll>
+#define loop(i,n) for(int i=0 ; i<n ; ++i)
+#define rep(i,x,n) for(int i=x ; i<=n ; ++i)
+#define iteloop(type,data,name,it) for(type<data>::iterator it=name.begin() ;it!=name.end() ; ++it)
+
+using namespace __gnu_pbds;
+using namespace std;
+
+template<typename T>
+using os = tree<T, null_type, less<T>, rb_tree_tag,
+        tree_order_statistics_node_update>;
+
+const int N=2e4+5,M=1e4+5,MOD=1e9+7,OO=1e9,INF=1e9;
+bool isPalindrome(string s){
+    stack<char> st;
+    loop(i,s.size()){
+        st.push(s[i]);
+    }
+    loop(i,s.size()){
+        if(s[i]!=st.top()){
+            return false;
+        }
+        st.pop();
+    }
+    return true;
+}
+bool isPrime(ll x){
+    if(x%2==0)return false;
+    for(ll i=3 ; i*i<=x ; i+=2){
+        if(x%i==0)return false;
+    }
+    return true;
+}
+int binary_to_int(string str){
+    reverse(str.begin(),str.end());
+    int ans=0;
+    int n=str.size();
+    loop(i,n){
+        if(str[i]=='1')
+            ans+=(int)pow(2,i);
+    }
+    return ans;
+}
+string bin(int n){
+    string binary="";
+    while(n>0){
+        if(n&1)binary+='1';
+        else binary+='0';
+        n/=2;
+    }
+    reverse(binary.begin(),binary.end());
+    return binary;
+}
+int main(){
+    cin.sync_with_stdio(false), cin.tie(0) , cout.tie(0);
+#ifndef ONLINE_JUDGE
+    freopen("in.txt", "rt" , stdin);
+    // freopen("in.txt", "wt" , stdout);
+#endif // ONLINE_JUDGE
+    string str;
+    while(cin>>str){
+        int x=binary_to_int(str);
+        while(true){
+            string b=bin(x);
+            if(isPalindrome(b) && isPrime(x)){
+                cout<<b<<endl;
+                break;
+            }
+            x++;
+        }
+    }
+}
