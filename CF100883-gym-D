@@ -1,0 +1,64 @@
+#include <bits/stdc++.h>
+#include <ext/pb_ds/assoc_container.hpp>
+#include <unistd.h>
+
+
+#define ll long long
+#define lst(x) x.size()-1
+#define ld long double
+#define pr pair<ll,ll>
+#define loop(i,n) for(ll i=0 ; i<n ; ++i)
+#define rep(i,x,n) for(ll i=x ; i<=n ; ++i)
+#define iteloop(type,data,name,it) for(type<data>::iterator it=name.begin() ;it!=name.end() ; ++it)
+
+using namespace __gnu_pbds;
+using namespace std;
+
+template<typename T>
+using os = tree<T, null_type, less<T>, rb_tree_tag,
+        tree_order_statistics_node_update>;
+
+const int N=1e6+5,M=1e1+5,MOD=1e9+7,OO=1e9,INF=1e9;
+ll arr[N],n,k;
+bool isValid(ll x){
+    int cur=0;
+    ll mx=arr[0];
+    int st=0;
+    rep(i,1,n-1){
+        mx=max(mx,arr[i]);
+        if(mx*(i-st+1)>x){
+            cur++;
+            if(cur>=k)return false;
+            st=i;
+            mx=arr[i];
+        }
+    }
+    return true;
+}
+int main(){
+    cin.sync_with_stdio(false), cin.tie(0) , cout.tie(0);
+#ifndef ONLINE_JUDGE
+    freopen("in.txt", "rt" , stdin);
+    // freopen("in.txt", "wt" , stdout);
+#endif // ONLINE_JUDGE
+    int t;
+    cin>>t;
+    while(t--){
+        cin>>n>>k;
+        ll mx=0;
+        loop(i,n){
+            cin>>arr[i];
+            mx=max(mx,arr[i]);
+        }
+        ll st=mx,en=mx*n;
+        while(st<=en){
+            ll mid=(st+en)/2;
+            if(isValid(mid)){
+                en=mid-1;
+            }else{
+                st=mid+1;
+            }
+        }
+        cout<<en+1<<endl;
+    }
+}
