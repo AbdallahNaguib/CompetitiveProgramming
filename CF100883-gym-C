@@ -1,0 +1,70 @@
+#include <bits/stdc++.h>
+#include <ext/pb_ds/assoc_container.hpp>
+#include <unistd.h>
+
+
+#define ll long long
+#define lst(x) x.size()-1
+#define ld long double
+#define pr pair<ll,ll>
+#define loop(i,n) for(ll i=0 ; i<n ; ++i)
+#define rep(i,x,n) for(ll i=x ; i<=n ; ++i)
+#define iteloop(type,data,name,it) for(type<data>::iterator it=name.begin() ;it!=name.end() ; ++it)
+
+using namespace __gnu_pbds;
+using namespace std;
+
+template<typename T>
+using os = tree<T, null_type, less<T>, rb_tree_tag,
+        tree_order_statistics_node_update>;
+
+const int N=1e6+5,M=1e1+5,MOD=1e9+7,OO=1e9,INF=1e9;
+int coins[N];
+int vis[N],vid;
+int main(){
+    cin.sync_with_stdio(false), cin.tie(0) , cout.tie(0);
+#ifndef ONLINE_JUDGE
+    freopen("in.txt", "rt" , stdin);
+    // freopen("in.txt", "wt" , stdout);
+#endif // ONLINE_JUDGE
+    int t;
+    cin>>t;
+    while(t--){
+        vid++;
+        int n,m;
+        cin>>n>>m;
+        loop(i,n){
+            int x;
+            cin>>x;
+            if(vis[x]!=vid){
+                vis[x]=vid;
+                coins[x]=1;
+            }else{
+                coins[x]++;
+            }
+        }
+        vector<pair<ll,int>> vec;
+        rep(i,1,N-5){
+            if(vis[i]==vid){
+                vec.push_back({coins[i]*i,i});
+            }
+        }
+        sort(vec.begin(),vec.end());
+        reverse(vec.begin(),vec.end());
+        ll sum=0;
+        set<int> ans;
+        loop(i,vec.size()){
+            sum+=vec[i].first;
+            ans.insert(vec[i].second);
+            if(sum>=m)break;
+        }
+        if(sum>=m){
+            for(int x:ans){
+                cout<<x<<" ";
+            }
+            cout<<endl;
+        }else{
+            cout<<"Impossible"<<endl;
+        }
+    }
+}
