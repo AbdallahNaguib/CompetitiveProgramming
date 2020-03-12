@@ -1,0 +1,94 @@
+#include <bits/stdc++.h>
+#include <ext/pb_ds/assoc_container.hpp>
+
+#define pr pair<ll,ll>
+#define loop(i,n) for(ll i=0 ; i<n ; i++)
+#define rep(i,x,n) for(ll i=x ; i<=n ; i++)
+#define PI 3.141592654
+
+using namespace std;
+using namespace __gnu_pbds;
+
+typedef long long ll;
+template<typename T>
+using ordered_set = tree<T, null_type, less<T>, rb_tree_tag, tree_order_statistics_node_update>;
+
+const ll N=1e5 + 5,M=35, MOD=1e9 + 7 , OO=2e9;
+struct node{
+    bool num;
+    ll mn=1e9;
+    pair<node*,node*> childs;
+    node(){};
+    node(bool nm):num(nm){}
+};
+ll pow2[M];
+void add(node *cur,ll num,ll ind){
+    for(ll i=M-1 ; ~i ; --i){
+        cur->mn = min(cur->mn,ind);
+        if(num>=pow2[i]){
+            if(cur->childs.second== nullptr){
+                cur->childs.second = new node(1);
+            }
+            cur = cur->childs.second;
+            num-=pow2[i];
+        }else{
+            if(cur->childs.first== nullptr){
+                cur->childs.first = new node(0);
+            }
+            cur = cur->childs.first;
+        }
+    }
+    cur->mn = min(cur->mn,ind);
+}
+ll query(node *cur,ll num){
+    for(ll i=M-1 ; ~i ; --i){
+        if(num>=pow2[i]){
+            // then take the 0 side
+            if(cur->childs.first != nullptr){
+                cur = cur->childs.first;
+            }else{
+                // I have to take the 1 side
+                cur = cur->childs.second;
+            }
+            num-=pow2[i];
+        }else{
+            // then take the 1 side
+            if(cur->childs.second != nullptr){
+                cur = cur->childs.second;
+            }else{
+                // I have to take the 0 side
+                cur = cur->childs.first;
+            }
+        }
+    }
+    return cur->mn;
+}
+int main() {
+#ifndef ONLINE_JUDGE
+    freopen("in.txt", "rt", stdin);
+#endif
+  //  ios_base::sync_with_stdio(0), cin.tie(0), cout.tie(0);
+    pow2[0]=1;
+    rep(i,1,M-1){
+        pow2[i]=pow2[i-1]*2;
+    }
+    ll t;
+    scanf("%lld",&t);
+    while(t--){
+        ll n,q;
+        scanf("%lld %lld",&n,&q);
+        node *root=new node();
+        loop(i,n){
+            ll x;
+            scanf("%lld",&x);
+            add(root,x,i);
+        }
+        loop(i,q){
+            ll x;
+            scanf("%lld",&x);
+            int res=query(root,x)+1;
+            printf("%d\n",res);
+        }
+        printf("\n");
+    }
+}
