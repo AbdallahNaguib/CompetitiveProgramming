@@ -1,0 +1,68 @@
+#include <bits/stdc++.h>
+#include <ext/pb_ds/assoc_container.hpp>
+
+#define pr pair<ll,ll>
+#define loop(i,n) for(ll i=0 ; i<n ; i++)
+#define rep(i,x,n) for(ll i=x ; i<=n ; i++)
+#define PI 3.141592654
+
+using namespace std;
+using namespace __gnu_pbds;
+
+typedef long long ll;
+template<typename T>
+using ordered_set = tree<T, null_type, less<T>, rb_tree_tag, tree_order_statistics_node_update>;
+
+const ll N=1e2 + 5,M=35, MOD=1e9 + 7 , OO=1e18;
+long double dist(pair<long double,long double> p1,pair<long double,long double> p2){
+    long double X=p1.first-p2.first;
+    long double Y=p1.second-p2.second;
+    return sqrt(X*X+Y*Y);
+}
+ll eucDist(pair<ll,ll> p1,pair<ll,ll> p2){
+    return abs(p1.first - p2.first)+abs(p1.second-p2.second);
+}
+pair<pair<long double,long double>,long double> polls[N];
+vector<ll> graph[N];
+ll vis[N],vid;
+ll len[N];
+ll n;
+
+void bfs(ll start){
+    loop(i,n){
+        len[i]=1e12;
+    }
+    vid++;
+    queue<ll> q;
+    q.push(start);
+    vis[start]=vid;
+    len[start]=0;
+    while(!q.empty()){
+        ll u=q.front();
+        q.pop();
+        for(ll v:graph[u]){
+            if(vis[v]==vid)continue;
+            vis[v]=vid;
+            len[v]=min(len[v],len[u]+1);
+            q.push(v);
+        }
+    }
+}
+int main() {
+#ifndef ONLINE_JUDGE
+    freopen("in.txt", "rt", stdin);
+#endif
+    ios_base::sync_with_stdio(0), cin.tie(0), cout.tie(0);
+    ll t;
+    cin>>t;
+    int tst=0;
+    while(t--){
+        tst++;
+        int h1,m1,h2,m2;
+        cin>>h1>>m1>>h2>>m2;
+        int t1=h1*60+m1;
+        int t2=h2*60+m2;
+        int ans=t2-t1;
+        printf("Case %d: %d\n",tst,ans);
+    }
+}
