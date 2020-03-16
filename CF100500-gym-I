@@ -1,0 +1,58 @@
+#include <bits/stdc++.h>
+#include <ext/pb_ds/assoc_container.hpp>
+
+#define pr pair<ll,ll>
+#define loop(i,n) for(ll i=0 ; i<n ; i++)
+#define rep(i,x,n) for(ll i=x ; i<=n ; i++)
+#define PI 3.141592654
+
+using namespace std;
+using namespace __gnu_pbds;
+
+typedef long long ll;
+template<typename T>
+using ordered_set = tree<T, null_type, less<T>, rb_tree_tag, tree_order_statistics_node_update>;
+
+const ll N=2e4 + 5,M=35, MOD=1e9 + 7 , OO=1e18;
+int n;
+string arr[N];
+ll tst=0;
+void print(ll ans){
+    printf("Case %lld: %lld\n",tst,ans);
+}
+int main() {
+#ifndef ONLINE_JUDGE
+    freopen("in.txt", "rt", stdin);
+#endif
+    ios_base::sync_with_stdio(0), cin.tie(0), cout.tie(0);
+    ll t;
+    cin>>t;
+    while(t--){
+        tst++;
+        n=0;
+        while(cin>>arr[n++]){
+            if(arr[n-1]=="*")break;
+        }
+        map<char,int> mp;
+        loop(i,n){
+            loop(j,arr[i].size()){
+                mp[tolower(arr[i][j])]++;
+            }
+        }
+        vector<pair<int,char>> vec;
+        for(auto p:mp){
+            vec.push_back({p.second,p.first});
+        }
+        sort(vec.begin(),vec.end());
+        reverse(vec.begin(),vec.end());
+        int sum=0;
+        loop(i,min(5,(int)vec.size())){
+            sum+=vec[i].second-'a';
+        }
+        if(sum>62){
+            printf("Case %lld: Effective\n",tst);
+        }else{
+            printf("Case %lld: Ineffective\n",tst);
+        }
+    }
+}
