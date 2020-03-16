@@ -1,0 +1,89 @@
+#include <bits/stdc++.h>
+#include <ext/pb_ds/assoc_container.hpp>
+
+#define pr pair<int,int>
+#define loop(i,n) for(int i=0 ; i<n ; i++)
+#define rep(i,x,n) for(ll i=x ; i<=n ; i++)
+#define PI 3.141592654
+
+using namespace std;
+using namespace __gnu_pbds;
+
+typedef long long ll;
+template<typename T>
+using ordered_set = tree<T, null_type, less<T>, rb_tree_tag, tree_order_statistics_node_update>;
+
+const ll N=2e4 + 5,M=35, MOD=1e9 + 7 , OO=1e18;
+pr arr1[10],arr2[10];
+int n,m;
+int memo[2<<9][2<<9][30][2];
+int pow2[10];
+
+int changeBit(int pat,int ind){
+    return pat+pow2[ind];
+}
+
+bool getBit(int pat,int ind){
+   return (pat>>ind) & 1;
+}
+int code=28;
+int dp(int pat1,int pat2,int lstChar,bool cur){
+    int &res=memo[pat1][pat2][lstChar][cur];
+    if(res!=-1)return res;
+    if(cur){
+        loop(i,n){
+            if(!getBit(pat1,i) && (arr1[i].first==lstChar || lstChar==code)){
+                if(dp(changeBit(pat1,i),pat2,arr1[i].second,!cur)==1){
+                    return res=1;
+                }
+            }
+        }
+        return res=2;
+    }else{
+        loop(i,m){
+            if(!getBit(pat2,i) && (arr2[i].first==lstChar || lstChar==-1)){
+                if(dp(pat1,changeBit(pat2,i),arr2[i].second,!cur)==2){
+                    return res=2;
+                }
+            }
+        }
+        return res=1;
+    }
+}
+
+int tst;
+int main() {
+#ifndef ONLINE_JUDGE
+    freopen("in.txt", "rt", stdin);
+#endif
+    ios_base::sync_with_stdio(0), cin.tie(0), cout.tie(0);
+    pow2[0]=1;
+    rep(i,1,9){
+        pow2[i]=pow2[i-1]*2;
+    }
+    ll t;
+    cin>>t;
+    while(t--){
+        tst++;
+        cin>>n;
+        cin.ignore(1);
+        loop(i,n){
+            string line;
+            getline(cin,line);
+            arr1[i].first=line[0]-'a';
+            arr1[i].second=line.back()-'a';
+        }
+        memset(memo,-1,sizeof(memo));
+        cin>>m;
+        cin.ignore(1);
+        loop(i,m){
+            string line;
+            getline(cin,line);
+            arr2[i].first=line[0]-'a';
+            arr2[i].second=line.back()-'a';
+        }
+
+        int win=dp(0,0,code,1);
+        printf("Game %d: player%d\n",tst,win);
+    }
+}
