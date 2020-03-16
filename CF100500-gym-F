@@ -1,0 +1,51 @@
+#include <bits/stdc++.h>
+#include <ext/pb_ds/assoc_container.hpp>
+
+#define pr pair<ll,ll>
+#define loop(i,n) for(ll i=0 ; i<n ; i++)
+#define rep(i,x,n) for(ll i=x ; i<=n ; i++)
+#define PI 3.141592654
+
+using namespace std;
+using namespace __gnu_pbds;
+
+typedef long long ll;
+template<typename T>
+using ordered_set = tree<T, null_type, less<T>, rb_tree_tag, tree_order_statistics_node_update>;
+
+const ll N=2e4 + 5,M=35, MOD=1e9 + 7 , OO=1e18;
+ll n,m;
+ll tst=0;
+void print(ll ans1,ll ans2){
+    printf("Case %lld: %lld %lld\n",tst,ans1,ans2);
+}
+ll getTotal(ll x){
+    return (x+1)*(x+2)/2;
+}
+bool isValid(ll x){
+    return getTotal(x)<m;
+}
+int main() {
+#ifndef ONLINE_JUDGE
+    freopen("in.txt", "rt", stdin);
+#endif
+    ios_base::sync_with_stdio(0), cin.tie(0), cout.tie(0);
+    ll t;
+    cin>>t;
+    while(t--){
+        tst++;
+        cin>>n>>m;
+        ll st=0,en=n;
+        while(st<=en){
+            ll mid=(st+en)/2;
+            if(isValid(mid)){
+                st=mid+1;
+            }else{
+                en=mid-1;
+            }
+        }
+        ll frst=st-1;
+        ll total=getTotal(frst);
+        print(frst+1,m-total-1);
+    }
+}
