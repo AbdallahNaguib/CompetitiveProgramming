@@ -1,0 +1,52 @@
+#include <bits/stdc++.h>
+#include <ext/pb_ds/assoc_container.hpp>
+
+#define pr pair<ll,ll>
+#define loop(i,n) for(ll i=0 ; i<n ; i++)
+#define rep(i,x,n) for(ll i=x ; i<=n ; i++)
+#define PI 3.141592654
+
+using namespace std;
+using namespace __gnu_pbds;
+
+typedef long long ll;
+template<typename T>
+using ordered_set = tree<T, null_type, less<T>, rb_tree_tag, tree_order_statistics_node_update>;
+
+const ll N=1e5 + 5,M=35, MOD=1e9 + 7 , OO=1e18;
+ll arr[N],n,m,c;
+ll tst=0;
+void print(ll ans){
+    printf("Case %lld: %lld\n",tst,ans);
+}
+int main() {
+#ifndef ONLINE_JUDGE
+    freopen("in.txt", "rt", stdin);
+#endif
+    ios_base::sync_with_stdio(0), cin.tie(0), cout.tie(0);
+    ll t;
+    cin>>t;
+    while(t--){
+        tst++;
+        cin>>m>>n>>c;
+        map<int,int> cnt;
+        loop(i,m){
+            int x;
+            cin>>x;cnt[x]++;
+        }
+        vector<pr> items;
+        ll sum=0;
+        for(auto p:cnt){
+            ll x=(p.first*p.first)%c;
+            items.push_back({p.second,x});
+            sum+=x;
+        }
+        sort(items.begin(),items.end());
+        ll res=0;
+        for(auto p:items){
+            res=max(res,sum*p.first);
+            sum-=p.second;
+        }
+        print(res);
+    }
+}
