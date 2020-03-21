@@ -1,0 +1,39 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+const int N=1e5 + 5,T=5e1 + 5,INF=1e9;
+struct Task{
+    long long mx,pts,req;
+};
+
+bool cmp(Task task1,Task task2){
+    if(task1.req * task2.pts != task2.req * task1.pts)
+        return task1.req * task2.pts < task2.req * task1.pts;
+    return task1.mx >= task2.mx;
+}
+int dp[N][T];
+int Time;
+vector<Task> tasks;
+int solve(int time,int i){
+    if(time>Time)return -INF;
+    if(i>=tasks.size())return 0;
+    int &res=dp[time][i];
+    if(~res)return res;
+    int newTime=time+tasks[i].req;
+    return res=max(0ll,max(solve(newTime,i+1)+tasks[i].mx-tasks[i].pts*newTime
+            , (long long)solve(time,i+1)));
+}
+class TheProgrammingContestDivOne{
+public:
+    int find(int t,vector<int> maxPoints,vector<int> pointsPerMinute,vector<int> reqTime){
+        Time=t;
+        tasks.clear();
+        for(int i=0 ; i<maxPoints.size() ; i++){
+            Task t2={maxPoints[i],pointsPerMinute[i],reqTime[i]};
+            tasks.push_back(t2);
+        }
+        memset(dp,-1,sizeof(dp));
+        sort(tasks.begin(),tasks.end(),cmp);
+        return solve(0,0);
+    }
+};
