@@ -1,0 +1,104 @@
+#include <bits/stdc++.h>
+#include <ext/pb_ds/assoc_container.hpp>
+
+#define pr pair<ll,ll>
+#define loop(i,n) for(int i=0 ; i<n ; i++)
+#define rep(i,x,n) for(int i=x ; i<=n ; i++)
+#define PI 3.141592654
+
+using namespace std;
+using namespace __gnu_pbds;
+
+typedef long long ll;
+template<typename T>
+using ordered_set = tree<T, null_type, less_equal<T>, rb_tree_tag, tree_order_statistics_node_update>;
+
+const ll N=50 + 5,M=2e2 + 5, MOD=1e9 + 7 , OO=1e12;
+ll memo[N][N],ADD,ERASE,dist[M][M];
+string wrd;
+ll dp(int i,int j){
+    if(i>=j)return 0;
+    ll &res=memo[i][j];
+    if(~res)return res;
+    res=OO;
+    if(wrd[i]==wrd[j]){
+        res=min(res,dp(i+1,j-1));
+    }
+    // add in the beginning
+    res = min(res,dist[ADD][wrd[j]] + dp(i,j-1));
+    // add in the end
+    res = min(res,dist[ADD][wrd[i]] + dp(i+1,j));
+    // erase from the end
+    res = min(res,dist[wrd[j]][ERASE] + dp(i,j-1));
+    // erase from the beginning
+    res = min(res,dist[wrd[i]][ERASE] + dp(i+1,j));
+
+    // change the first to the last
+    res = min(res,dist[wrd[i]][wrd[j]] + dp(i+1,j-1));
+
+    // change the last to the first
+    res = min(res,dist[wrd[j]][wrd[i]] + dp(i+1,j-1));
+
+    // change both of them into a new char
+    for(char ch='a' ; ch<='z' ; ch++){
+        if(ch==wrd[i]||ch==wrd[j])continue;
+        res = min(res , dist[wrd[i]][ch]+dist[wrd[j]][ch]+dp(i+1,j-1));
+        res = min(res , dist[ADD][ch]+dist[wrd[j]][ch]+dp(i,j-1));
+        res = min(res , dist[ADD][ch]+dist[wrd[i]][ch]+dp(i+1,j));
+    }
+    return res;
+}
+class PalindromizationDiv1{
+public:
+    ll getMinimumCost(string word, vector <string> operations){
+        wrd=word;
+        int n=word.size();
+        ADD='z'+1;
+        ERASE=ADD+1;
+        for(int i=0 ; i<M ; i++){
+            for(int j=0 ; j<M ; j++){
+                if(i!=j){
+                    dist[i][j]=OO;
+                }
+            }
+        }
+        for(string op:operations){
+            stringstream ss;
+            char c1,c2;
+            int x;
+            ss<<op;
+            string o;
+            ss>>o;
+            if(o=="erase"){
+                ss>>c1>>x;
+                dist[c1][ERASE] = min(dist[c1][ERASE],(ll)x);
+            }else if(o=="add"){
+                ss>>c1>>x;
+                dist[ADD][c1] = min(dist[ADD][c1],(ll)x);
+            }else{
+                ss>>c1>>c2>>x;
+                dist[c1][c2] = min(dist[c1][c2],(ll)x);
+            }
+        }
+        for(int k='a' ; k<=ERASE ; k++){
+            for(int i='a' ; i<=ERASE ; i++){
+                for(int j='a' ; j<=ERASE ; j++){
+                    dist[i][j] = min(dist[i][j],dist[i][k] + dist[k][j]);
+                }
+            }
+        }
+        dist[ERASE][ADD]=0;
+        memset(memo,-1,sizeof(memo));
+        ll ans=dp(0,n-1);
+        if(ans>=OO)return -1;
+        return ans;
+    }
+};
+int main() {
+#ifndef ONLINE_JUDGE
+    freopen("in.txt", "rt", stdin);
+#endif
+    PalindromizationDiv1 pd;
+   // cout<<pd.getMinimumCost("acb",{"erase a 10","add b 10"})<<endl;
+    cout<<pd.getMinimumCost("ltbgpjcsaknlzctionkqffrpevmybpptydvizassekdoznkln", {"change g n 47673", "erase r 77264", "change l t 42081", "add r 4800", "add b 96464", "erase k 51662", "change b n 39898", "erase d 22461", "erase g 27854", "change p u 14295", "add d 51496", "add e 75369", "add o 87389", "change t z 27185", "change c z 71695", "change b l 54216", "add i 19003", "add f 27638", "add u 85866", "change j u 67802", "erase t 57582", "erase i 22054", "add k 10000", "change q b 34740", "add q 72938", "change x m 44234", "erase s 36666", "erase b 14907", "add h 69181", "erase f 99058", "change p b 90898", "erase l 21277", "add x 32316", "change c m 85633", "change v o 96383", "change y u 61797", "change h v 19755", "change p r 8901", "change n h 99960"})<<endl;
+}
