@@ -1,0 +1,128 @@
+#pragma GCC optimize ("O3")
+#include <bits/stdc++.h>
+
+using namespace std;
+const int N=2e6+5;
+struct BIT{
+    int *arr,sz;
+    BIT(int n){
+        sz=(1<<int(ceil(log2(n))));
+        arr=new int[sz];
+        memset(arr,0,sz*sizeof(arr[0]));
+    }
+
+    void add(int i,int x){
+        for(i++;i<=sz;i+=(i&-i))
+            arr[i-1]+=x;
+    }
+    int get(int i){
+        int res=0;
+        for(i++;i;i-=(i&-i))
+            res+=arr[i-1];
+        return res;
+    }
+    int find(int val){
+        int st=0;
+        for(int s=sz>>1 ; s ; s>>=1)
+            if(val>arr[st+s-1])
+                val-=arr[(st+=s)-1];
+        return st;
+    }
+};
+struct mySet{
+    BIT bit;
+    mySet(int mxVal):bit(mxVal+1){
+
+    }
+    void insert(int x){
+        bit.add(x,1);
+    }
+    int count(int x){
+        return bit.get(x)-bit.get(x-1);
+    }
+    int operator[](int i){
+        return bit.find(i+1);
+    }
+    int size(){
+        return bit.get(bit.sz-1);
+    }
+    void erase(int val){
+        bit.add(val,-count(val));
+    }
+    // delete cnt items of value val
+    void erase(int val,int cnt){
+        bit.add(val,-min(cnt,count(val)));
+    }
+};
+pair<int,int> arr[N];
+int main() {
+#ifndef ONLINE_JUDGE
+    freopen("in.txt", "r", stdin);
+    //freopen("out.txt", "w", stdout);
+#endif
+    ios_base::sync_with_stdio(0), cin.tie(0), cout.tie(0);
+
+    mySet st(N);
+    for(int i=1 ; i<N ; i+=2){
+        st.insert(i);
+    }
+    for (int j = 1; j <= 12000; ++j) {
+        int x=st[j];
+        set<int> er;
+        while(x<st.size()){
+            er.insert(st[x-1]);
+            x+=st[j];
+        }
+        for(int y:er){
+            st.erase(y);
+        }
+    }
+    for(int i=2 ; i<=N ; i+=2){
+        int srch = i/2;
+        // get the left
+        int start = 0,end=st.size();
+        while(start<=end){
+            int mid=(start+end)/2;
+            if(st[mid]<=srch){
+                start = mid+1;
+            }else{
+                end = mid-1;
+            }
+        }
+        int lft = start-1;
+        // get the right
+        if(srch*2<i)srch++;
+        start = 0,end=st.size();
+        while(start<=end){
+            int mid=(start+end)/2;
+            if(st[mid]>=srch){
+                end = mid-1;
+            }else{
+                start = mid+1;
+            }
+        }
+        int rt = end+1;
+        while(true){
+            int val = st[lft]+st[rt];
+            if(val<i){
+                rt++;
+            }else if(val>i){
+                lft--;
+            }else{
+                break;
+            }
+        }
+        arr[i] = {st[lft],st[rt]};
+       // cout<<i<<" "<<arr[i].first<<" "<<arr[i].second<<endl;
+    }
+
+    int n;
+    while(cin>>n){
+        if(!arr[n].first){
+            printf("%d is not the sum of two luckies!\n",n);
+        }else{
+            printf("%d is the sum of %d and %d.\n",n,arr[n].first,arr[n].second);
+        }
+    }
+    return 0;
+}
