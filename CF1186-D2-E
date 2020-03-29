@@ -1,0 +1,131 @@
+//#pragma GCC optimize ("O3")
+#include <bits/stdc++.h>
+#include <ext/pb_ds/assoc_container.hpp>
+
+#define pr pair<ll,ll>
+#define loop(i,n) for(ll i=0 ; i<n ; i++)
+#define rep(i,x,n) for(ll i=x ; i<=n ; i++)
+#define PI 3.141592654
+
+using namespace std;
+using namespace __gnu_pbds;
+
+typedef long long ll;
+template<typename T>
+using ordered_set = tree<T, null_type, less<T>, rb_tree_tag, tree_order_statistics_node_update>;
+
+const ll N=1e3 + 5,M=(1<<30), MOD=1e9 + 7 , OO=1e18;
+ll q;
+bool getBit(ll ind){
+    if(ind<=1)return ind;
+    ll x=M;
+    while(x>=ind){
+        x>>=1;
+    }
+    return !getBit(ind-x);
+}
+ll getSum(ll ind){
+    if(ind&1){
+        return ind/2 + getBit(ind);
+    }else{
+        return ind/2;
+    }
+}
+ll getSumZeros(ll ind){
+    return ind - getSum(ind);
+}
+ll cntOfOnesRows[N][N],cntOfZerosRows[N][N],cntOfOnesCols[N][N]
+,cntOfZerosCols[N][N],n,m,totalOnes,totalZeros;
+ll getSumForPat(ll ind,ll cntOnes[],ll cntZeros[],ll sz){
+    ll i=ind/sz;
+    ll rem=ind%sz;
+    ll onesIndPlusOne = rem == 0 ? 0 : cntOnes[rem];
+    ll zerosIndPlusOne = rem == 0 ? 0 : cntZeros[rem];
+    ll onesInd = cntOnes[sz] - onesIndPlusOne;
+    ll zerosInd = cntZeros[sz] - zerosIndPlusOne;
+    return getSum(i+1)*onesIndPlusOne + getSum(i)*onesInd + 
+        getSumZeros(i+1)*zerosIndPlusOne + getSumZeros(i)*zerosInd;
+}
+ll getSumOverMat(ll i,ll j){
+    ll ones = getSum(i);
+    ll zeros = i-ones;
+    ll onesInOnes = getSum(j);
+    ll onesInZeros = j- onesInOnes;
+    return onesInOnes*ones + onesInZeros*zeros;
+}
+ll getMatSum(ll i,ll j){// 1 based
+    ll ones = getSumOverMat(i,j);
+    ll zeros = i*j - ones;
+    return ones*totalOnes + zeros*totalZeros;
+}
+ll getSumWithOrigIndices(ll i,ll j){
+    if(i<=0 || j<=0)return 0;
+    ll i2 = i/n;
+    ll j2 = j/m;
+    ll sum = getMatSum(i2,j2);
+    bool rowStartPat = getBit(i2+1);
+    bool colStartPat = getBit(j2+1);
+    ll k=i%n;
+    ll x=0;
+    if(k) {
+        x = getSumForPat(j2 * m, cntOfOnesRows[k], cntOfZerosRows[k], m);
+        if (!rowStartPat) {
+            x = j2 * m * k - x;
+        }
+        sum += x;
+        x=0;
+    }
+    k=j%m;
+    if(k) {
+        x = getSumForPat(i, cntOfOnesCols[k], cntOfZerosCols[k], n);
+        if (!colStartPat) {
+            x = i * k - x;
+        }
+    }
+    sum+=x;
+    return sum;
+}
+ll query(int x1,int x2,int y1,int y2){
+    ll big = getSumWithOrigIndices(x2,y2);
+ //   cout<<big<<endl;
+    ll sm1 = getSumWithOrigIndices(x1-1,y2);
+ //   cout<<sm1<<endl;
+    ll sm2 = getSumWithOrigIndices(x2,y1-1);
+ //   cout<<sm2<<endl;
+    ll verySm = getSumWithOrigIndices(x1-1,y1-1);
+ //   cout<<verySm<<endl;
+    return big-sm1-sm2+verySm;
+}
+char mat[N][N];
+int main() {
+#ifndef ONLINE_JUDGE
+    freopen("in.txt", "rt", stdin);
+#endif
+  //  ios_base::sync_with_stdio(0), cin.tie(0), cout.tie(0);
+    scanf("%lld %lld %lld\n",&n,&m,&q);
+    rep(i,1,n){
+        rep(j,1,m){
+            scanf("%c",&mat[i][j]);
+            cntOfZerosRows[i][j] = cntOfZerosRows[i-1][j] +
+                    cntOfZerosRows[i][j-1] - cntOfZerosRows[i-1][j-1];
+            cntOfOnesRows[i][j] = cntOfOnesRows[i-1][j] +
+                    cntOfOnesRows[i][j-1] - cntOfOnesRows[i-1][j-1];
+            if(mat[i][j]=='0'){
+                totalZeros++;
+                cntOfZerosRows[i][j]++;
+            }else{
+                totalOnes++;
+                cntOfOnesRows[i][j]++;
+            }
+            cntOfOnesCols[j][i] = cntOfOnesRows[i][j];
+            cntOfZerosCols[j][i] = cntOfZerosRows[i][j];
+        }
+        scanf("\n");
+    }
+    int x1,x2,y1,y2;
+    loop(i,q){
+        scanf("%d%d%d%d",&x1,&y1,&x2,&y2);
+        ll ans=query(x1,x2,y1,y2);
+        printf("%lld\n",ans);
+    }
+}
