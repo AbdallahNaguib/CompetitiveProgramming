@@ -1,0 +1,128 @@
+// kth index statistics order
+
+#include<bits/stdc++.h>
+#define ll long long
+
+using namespace std;
+
+const int N = 5e5 + 5,bits=21 , MX=(1<<bits)-1 , mn = 0;
+int m;
+struct node;
+extern node* empty;
+// each leaf contains the frequency of the value in the array
+struct node
+{
+    int sum;
+    node *lf, *rt;
+    node():sum(0), lf(this), rt(this){}
+    node(int val, node* lf = empty, node* rt = empty):sum(val), lf(lf), rt(rt){}
+};
+
+node* empty = new node();
+
+node* insert(int val, node* cur, int ns = mn, int ne = MX){
+    if(val < ns or val > ne) return cur;
+    if(ns == ne) return new node(cur->sum + 1);
+    int mid = ns + (ne - ns)/2;
+    node* LF = insert(val, cur->lf, ns, mid);
+    node* RT = insert(val, cur->rt, mid + 1, ne);
+    return new node(LF->sum + RT->sum, LF, RT);
+}
+
+int query4(node* qe, node* qsm1, int k, int ns = mn, int ne = MX){
+    if(ns == ne) return ns;
+    int lfSz = qe->lf->sum - qsm1->lf->sum;
+    int mid = ns + (ne - ns)/2;
+    if(lfSz >= k) return query4(qe->lf, qsm1->lf, k, ns, mid);
+    return query4(qe->rt, qsm1->rt, k - lfSz, mid + 1, ne);
+}
+int query1(node* qe, node* qsm1, string &x,int lvl=0, int ns = mn, int ne = MX){
+    if(ns == ne) return ns;
+    int lfSz = qe->lf->sum - qsm1->lf->sum;
+    int rtSz = qe->rt->sum - qsm1->rt->sum;
+    int mid = ns + (ne - ns)/2;
+    if(x[lvl]=='0'){
+        if(rtSz){
+            return query1(qe->rt, qsm1->rt,x,lvl+1,mid + 1, ne);
+        }
+        return query1(qe->lf, qsm1->lf,x,lvl+1,ns, mid);
+    }else{
+        if(lfSz){
+            return query1(qe->lf, qsm1->lf,x,lvl+1,ns, mid);
+        }
+        return query1(qe->rt, qsm1->rt,x,lvl+1,mid + 1, ne);
+    }
+}
+int query3(node* qe, node* qsm1, int x, int ns = mn, int ne = MX){
+    if(ne<=x){
+        return qe->sum - qsm1->sum;
+    }
+    if(ns>x){
+        return 0;
+    }
+    int mid = ns + (ne - ns)/2;
+    return query3(qe->lf,qsm1->lf,x,ns,mid) + query3(qe->rt,qsm1->rt,x,mid+1,ne);
+}
+string bin(int n){
+    string binary="";
+    while(n>0){
+        if(n&1)binary+='1';
+        else binary+='0';
+        n/=2;
+    }
+    int diff = bits-binary.size();
+    for(int i=0 ; i<diff ; i++){
+        binary.push_back('0');
+    }
+    reverse(binary.begin(),binary.end());
+    return binary;
+}
+node* roots[N];
+
+int main()
+{
+#ifndef ONLINE_JUDGE
+    freopen("in.txt", "rt", stdin);
+#endif
+    roots[0] = empty;
+    scanf("%d",&m);
+    int sz=0;
+    while(m--){
+        int t;
+        scanf("%d",&t);
+        switch (t){
+            case 0:{
+                int x;
+                scanf("%d",&x);
+                roots[++sz] = insert(x,roots[sz-1]);
+                break;
+            }
+            case 1:{
+                int lf,rt,x;
+                scanf("%d%d%d",&lf,&rt,&x);
+                string b = bin(x);
+                printf("%d\n",query1(roots[rt],roots[lf-1],b));
+                break;
+            }
+            case 2:{
+                int k;
+                scanf("%d",&k);
+                sz-=k;
+                break;
+            }
+            case 3:{
+                int lf,rt,x;
+                scanf("%d%d%d",&lf,&rt,&x);
+                printf("%d\n",query3(roots[rt],roots[lf-1],x));
+                break;
+            }
+            case 4:{
+                int lf,rt,x;
+                scanf("%d%d%d",&lf,&rt,&x);
+                printf("%d\n",query4(roots[rt],roots[lf-1],x));
+                break;
+            }
+        }
+    }
+    return 0;
+}
