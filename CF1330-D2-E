@@ -1,0 +1,111 @@
+#include <bits/stdc++.h>
+#include <ext/pb_ds/assoc_container.hpp>
+
+#define pr pair<ll,ll>
+#define loop(i,n) for(int i=0 ; i<n ; i++)
+#define rep(i,x,n) for(int i=x ; i<=n ; i++)
+#define PI 3.141592654
+
+using namespace std;
+using namespace __gnu_pbds;
+
+typedef long long ll;
+template<typename T>
+using ordered_set = tree<T, null_type, less_equal<T>, rb_tree_tag, tree_order_statistics_node_update>;
+
+const ll N=(1<<22)+5,M=35, MOD=1e9 + 7 , OO=1e18;
+vector<int> sol;
+int arr[N],n,h,g,deepLvl;
+int getLastNode(int cur){
+    int lf=cur*2,rt=lf+1;
+    if(arr[lf]==0 && arr[rt]==0){
+        return cur;
+    }
+    if(arr[lf]>arr[rt])return getLastNode(lf);
+    return getLastNode(rt);
+}
+void updatePath(int cur){
+    int lf=cur*2,rt=lf+1;
+    if(arr[lf]==0 && arr[rt]==0){
+        arr[cur]=0;
+        return;
+    }
+    if(arr[lf]>arr[rt]){
+        arr[cur]=arr[lf];
+        updatePath(lf);
+    }else {
+        arr[cur]=arr[rt];
+        updatePath(rt);
+    }
+}
+int myLog(int x){
+    int ans=0;
+    while(x>1){
+        ans++;
+        x/=2;
+    }
+    return ans;
+}
+void update(int cur=1){
+    int lf=cur*2,rt=lf+1;
+    if(arr[lf]==0 && arr[rt]==0){
+        if(myLog(cur)>deepLvl) {
+            sol.push_back(cur);
+            arr[cur] = 0;
+        }
+        return;
+    }
+    int lstNode = getLastNode(cur);
+    int lvl = myLog(lstNode);
+    if(lvl>deepLvl){
+        sol.push_back(cur);
+        updatePath(cur);
+        update(cur);
+        return;
+    }
+    int tmp=cur;
+    while(tmp!=lstNode){
+        if(arr[tmp*2]>arr[tmp*2+1]){
+            update(tmp*2+1);
+            tmp*=2;
+        }else{
+            update(tmp*2);
+            tmp*=2;
+            tmp++;
+        }
+    }
+    if(arr[lf]>arr[rt]){
+        update(rt);
+    }else{
+        update(lf);
+    }
+}
+int main() {
+#ifndef ONLINE_JUDGE
+    freopen("in.txt", "rt", stdin);
+#endif
+    ios_base::sync_with_stdio(0), cin.tie(0), cout.tie(0);
+    int t;
+    scanf("%d",&t);
+    while(t--){
+        scanf("%d%d",&h,&g);
+        n=(1<<h)-1;
+        memset(arr,0,n*4*sizeof(arr[0]));
+        rep(i,1,n){
+            scanf("%d",arr+i);
+        }
+        deepLvl = g-1;
+        sol.clear();
+        update();
+        ll sum=0;
+        n=(1<<g)-1;
+        rep(i,1,n){
+            sum+=arr[i];
+        }
+        printf("%lld\n",sum);
+        loop(i,sol.size()){
+            printf("%d ",sol[i]);
+        }
+        printf("\n");
+    }
+}
