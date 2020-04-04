@@ -1,0 +1,61 @@
+#include <bits/stdc++.h>
+#include <ext/pb_ds/assoc_container.hpp>
+
+#define pr pair<ll,ll>
+#define loop(i,n) for(int i=0 ; i<n ; i++)
+#define rep(i,x,n) for(int i=x ; i<=n ; i++)
+#define PI 3.141592654
+
+using namespace std;
+using namespace __gnu_pbds;
+
+typedef long long ll;
+template<typename T>
+using ordered_set = tree<T, null_type, less_equal<T>, rb_tree_tag, tree_order_statistics_node_update>;
+
+const ll N=1e5 + 5,M=35, MOD=1e9 + 7 , OO=1e18;
+ll pow2[M],arr[M],sum[M];
+int main() {
+#ifndef ONLINE_JUDGE
+    freopen("in.txt", "rt", stdin);
+#endif
+    ios_base::sync_with_stdio(0), cin.tie(0), cout.tie(0);
+    int t;
+    scanf("%d",&t);
+    while(t--){
+        int d,m;
+        scanf("%d%d",&d,&m);
+        if(d==1){
+            printf("%d\n",1%m);
+            continue;
+        }
+        d++;
+        pow2[0]=1%m;
+        rep(i,1,M-1){
+            pow2[i] = pow2[i-1]*2;
+            pow2[i]%=m;
+        }
+        arr[1]=1%m;
+        rep(i,2,M-1){
+            arr[i] = arr[i-1]*(pow2[i-2]+1);
+            arr[i]%=m;
+        }
+        sum[1]=1%m;
+        rep(i,2,M-1){
+            sum[i] = sum[i-1]+pow2[i-1]*arr[i];
+            sum[i]%=m;
+        }
+        ll ans=0;
+        ll i=0;
+        for(;i<M;i++){
+            if(d>(1<<i)){
+                ans=sum[i];
+            }else{
+                break;
+            }
+        }
+        ans += arr[i] * (d - (1 << (i - 1)));
+        ans%=m;
+        printf("%lld\n",ans);
+    }
+}
