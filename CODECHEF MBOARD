@@ -1,0 +1,134 @@
+#include <bits/stdc++.h>
+
+#define pr pair<int,int>
+#define loop(i,n) for(int i=0 ; i<n ; i++)
+#define rep(i,x,n) for(int i=x ; i<=n ; i++)
+#define PI 3.141592654
+
+using namespace std;
+
+typedef long long ll;
+
+const int N = 5e5 + 5, MX = 5e5, MN = 0;
+
+struct BIT{
+    int *arr,sz;
+    BIT(int n){
+        sz=(1<<int(ceil(log2(n))));
+        arr=new int[sz];
+        memset(arr,0,sz*sizeof(arr[0]));
+    }
+
+    void add(int i,int x){
+        for(i++;i<=sz;i+=(i&-i))
+            arr[i-1]+=x;
+    }
+    int get(int i){
+        int res=0;
+        for(i++;i;i-=(i&-i))
+            res+=arr[i-1];
+        return res;
+    }
+};
+// this is a regular set works in log(n) and it can count the number of elements
+// bigger than some number
+struct mySet{
+    BIT bit;
+    mySet(int mxVal=MX):bit(mxVal+1){}
+    void insert(int x){
+        bit.add(x,1);
+    }
+    int countBigger(int x){
+        return this->size() - bit.get(x);
+    }
+    int size(){
+        return bit.get(bit.sz-1);
+    }
+    void erase(int val){
+        bit.add(val,-1);
+    }
+};
+
+int n,q;
+void update(int lstForUpdated[],int lstForDel[],mySet &updated,
+            mySet &del,int ind,int qid){
+    int &lstU = lstForUpdated[ind];
+    int &lstD = lstForDel[ind];
+    if(~lstD){
+        del.erase(lstD);
+        lstD=-1;
+    }
+    if(~lstU){
+        updated.erase(lstU);
+    }
+    updated.insert(qid);
+    lstU=qid;
+}
+int lstC[N],lstR[N],lstCZeros[N],lstRZeros[N];
+char op[15];
+int ind,val;
+
+int main() {
+#ifndef ONLINE_JUDGE
+    freopen("in.txt", "rt", stdin);
+#endif
+    mySet cols,rows,zerosCols,zerosRows;
+    memset(lstC,-1,sizeof(lstC));
+    memset(lstR,-1,sizeof(lstR));
+    memset(lstRZeros,-1,sizeof(lstRZeros));
+    memset(lstCZeros,-1,sizeof(lstCZeros));
+    scanf("%d%d",&n,&q);
+    rep(qid,1,q){
+        scanf("%s",op);
+        if(op[0]=='R' && strlen(op)==8){
+            // rowquery
+            scanf("%d",&ind);
+            if(~lstR[ind]){
+                // big will contain the number of 0s updates after this row was
+                // updated to 1
+                int big = zerosCols.countBigger(lstR[ind]);
+                printf("%d\n",big);
+            }else{
+                int lstUp = 0;
+                if(~lstRZeros[ind])lstUp=lstRZeros[ind];
+                // big will contain the number of 1s updates after this row was
+                // updated to 0
+                int big = cols.countBigger(lstUp);
+                printf("%d\n",n-big);
+            }
+        }else if(op[0]=='R'){
+            // rowset
+            scanf("%d%d",&ind,&val);
+            if(val==1){
+                update(lstR,lstRZeros,rows,zerosRows,ind,qid);
+            }else{
+                update(lstRZeros,lstR,zerosRows,rows,ind,qid);
+            }
+        }else if(op[0]=='C' && strlen(op)==8){
+            // colquery
+            scanf("%d",&ind);
+            if(~lstC[ind]){
+                // big will contain the number of 0s updates after this col was
+                // updated to 1
+                int big = zerosRows.countBigger(lstC[ind]);
+                printf("%d\n",big);
+            }else{
+                int lstUp = 0;
+                if(~lstCZeros[ind])lstUp=lstCZeros[ind];
+                // big will contain the number of 1s updates after this col was
+                // updated to 0
+                int big = rows.countBigger(lstUp);
+                printf("%d\n",n-big);
+            }
+        }else{
+            // colset
+            scanf("%d%d",&ind,&val);
+            if(val==1){
+                update(lstC,lstCZeros,cols,zerosCols,ind,qid);
+            }else{
+                update(lstCZeros,lstC,zerosCols,cols,ind,qid);
+            }
+        }
+    }
+    return 0;
+}
