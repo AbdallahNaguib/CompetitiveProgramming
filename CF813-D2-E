@@ -1,0 +1,84 @@
+#include <bits/stdc++.h>
+#include <ext/pb_ds/assoc_container.hpp>
+
+#define pr pair<ll,ll>
+#define loop(i,n) for(int i=0 ; i<n ; i++)
+#define rep(i,x,n) for(int i=x ; i<=n ; i++)
+#define PI 3.141592654
+
+using namespace std;
+using namespace __gnu_pbds;
+
+typedef long long ll;
+template<typename T>
+using ordered_set = tree<T, null_type, less<T>, rb_tree_tag, tree_order_statistics_node_update>;
+
+const int N = 1e5 + 5, MX = 1e9, MN = -MX;
+
+struct node;
+extern node *empty;
+
+struct node {
+    node *lf, *rt;
+    int sum = 0;
+
+    node() : lf(this), rt(this) {}
+
+    node(int val, node *lf = empty, node *rt = empty) : sum(val), lf(lf), rt(rt) {}
+};
+
+node *empty = new node();
+
+node *insert(int val, node *cur, int ns = MN, int ne = MX) {
+    if (val > ne or val < ns)return cur;
+    if (ns == ne)return new node(cur->sum + 1);
+    int mid = ns + (ne - ns) / 2;
+    node *LF = insert(val, cur->lf, ns, mid);
+    node *RT = insert(val, cur->rt, mid + 1, ne);
+    return new node(LF->sum + RT->sum, LF, RT);
+}
+node* roots[N];
+int query(node* qe,node* qsm1,int val, int ns = MN, int ne = MX){
+    if (val > ne)return 0;
+    if (val <= ns)return qe->sum - qsm1->sum;
+    int mid = ns + (ne - ns) / 2;
+    return query(qe->lf,qsm1->lf,val,ns,mid) +
+            query(qe->rt,qsm1->rt,val,mid+1,ne);
+}
+
+int n,k,q;
+int main() {
+#ifndef ONLINE_JUDGE
+    freopen("in.txt", "rt", stdin);
+#endif
+    scanf("%d%d",&n,&k);
+    roots[0]=empty;
+    map<int,queue<int>> mp;
+    rep(i,1,n){
+        int x;
+        scanf("%d",&x);
+        auto &qu=mp[x];
+        int pre=-1;
+        if(qu.size()>=k){
+            pre=qu.front();
+            qu.pop();
+        }
+        qu.push(i);
+        roots[i] = insert(pre,roots[i-1]);
+    }
+    scanf("%d",&q);
+    int last=0;
+    loop(i,q){
+        int l,r;
+        scanf("%d%d",&l,&r);
+        l=((l+last)%n)+1;
+        r=((r+last)%n)+1;
+        if(r<l)swap(l,r);
+        int ans = query(roots[r],roots[l-1],l);
+        int sz = r-l+1;
+        sz -= ans;
+        printf("%d\n",sz);
+        last=sz;
+    }
+    return 0;
+}
