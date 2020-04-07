@@ -1,0 +1,58 @@
+#include <bits/stdc++.h>
+
+#define pr pair<ll,ll>
+#define loop(i,n) for(ll i=0 ; i<n ; i++)
+#define rep(i,x,n) for(ll i=x ; i<=n ; i++)
+#define PI 3.141592654
+
+using namespace std;
+
+typedef long long ll;
+
+const ll N = 1e5 + 5, MX = 2e5, MN = 0;
+struct node;
+extern node* empty;
+struct node{
+    int mx;
+    node* LF,*RT;
+    node():mx(0),LF(this),RT(this){}
+    node(int val,node* lf=empty,node* rt=empty):mx(val),LF(lf),RT(rt){}
+};
+node* empty = new node();
+node* insert(int val,int ind,node* cur,int ns=0,int ne=MX){
+    if(ind>ne or ind<ns)return cur;
+    if(ns==ne)return new node(val);
+    int mid=ns+(ne-ns)/2;
+    node* lf=insert(val,ind,cur->LF,ns,mid);
+    node* rt=insert(val,ind,cur->RT,mid+1,ne);
+    return new node(max(lf->mx,rt->mx),lf,rt);
+}
+int getMax(int qe,node* cur,int ns=0,int ne=MX){
+    if(qe<0)return 0;
+    if(ns>qe)return 0;
+    if(ne<=qe)return cur->mx;
+    int mid=ns+(ne-ns)/2;
+    return max(getMax(qe,cur->LF,ns,mid),getMax(qe,cur->RT,mid+1,ne));
+}
+node* roots[N];
+int main() {
+#ifndef ONLINE_JUDGE
+    freopen("in.txt", "rt", stdin);
+#endif
+    int n,m;
+    scanf("%d%d",&n,&m);
+    rep(i,1,n){
+        roots[i] = empty;
+    }
+    loop(i,m){
+        int a,b,w;
+        scanf("%d%d%d",&a,&b,&w);
+        roots[b] = insert(getMax(w-1,roots[a])+1 , w,roots[b]);
+    }
+    int ans=0;
+    rep(i,1,n){
+        ans=max(ans,getMax(MX,roots[i]));
+    }
+    printf("%d\n",ans);
+    return 0;
+}
