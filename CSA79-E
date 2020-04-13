@@ -1,0 +1,109 @@
+#include <bits/stdc++.h>
+
+#define pr pair<ll,ll>
+#define loop(i,n) for(ll i=0 ; i<n ; i++)
+#define rep(i,x,n) for(ll i=x ; i<=n ; i++)
+#define PI 3.141592654
+
+using namespace std;
+
+typedef long long ll;
+
+const ll N = 5e6 + 5, MX = 2e5, MN = 0;
+ll n,k,pos[N],neg[N];
+ll lst[N],cur[N];
+struct PQ{
+    priority_queue<pr> pq;
+    bool empty(){
+        return pq.empty();
+    }
+    void push(pr x){
+        pq.push({-x.first,-x.second});
+    }
+    void pop(){
+        pq.pop();
+    }
+    pr top(){
+        pr x=pq.top();
+        return {-x.first,-x.second};
+    }
+};
+
+vector<pr> solve(ll arr[],ll n){
+    vector<pr> res;
+    res.push_back({0,-1});
+    if(!n)return res;
+    memset(lst,-1,sizeof(lst));
+    memset(cur,0,sizeof(cur));
+    PQ pq;
+    pq.push({arr[0],0});
+    ll cnt=0;
+    while(!pq.empty()){
+        pr x=pq.top();
+        pq.pop();
+        cnt++;
+        res.emplace_back(x);
+        ll &c=cur[x.second];
+        if(cnt>=k)break;
+        if(c==0 && x.second<n-1){
+            pq.push({arr[x.second+1],x.second+1});
+        }
+        if(x.second) {
+            if (c != lst[x.second - 1]) {
+                c++;
+                while (c < res.size() && res[c].second >= x.second) {
+                    c++;
+                }
+                if (c < res.size())
+                    pq.push({arr[x.second] + res[c].first, x.second});
+            } else {
+                lst[x.second] = res.size() - 1;
+            }
+        }else{
+            lst[x.second]=1;
+        }
+    }
+    return res;
+}
+int main() {
+#ifndef ONLINE_JUDGE
+    freopen("in.txt", "rt", stdin);
+#endif
+   // ios_base::sync_with_stdio(0), cin.tie(0), cout.tie(0);
+    scanf("%lld %lld",&n,&k);
+    ll posN=0,negN=0;
+    ll sum=0;
+    loop(i,n){
+        ll x;
+        scanf("%lld",&x);
+        if(x<0){
+            sum+=x;
+            neg[negN++]=-x;
+        }
+        else pos[posN++]=x;
+    }
+    sort(neg,neg+negN);
+    sort(pos,pos+posN);
+    vector<pr> ps = solve(pos,posN);
+    vector<pr> ng = solve(neg,negN);
+    sort(ps.begin(),ps.end());
+    sort(ng.begin(),ng.end());
+    posN=ps.size();
+    negN=ng.size();
+    PQ pq;
+    memset(cur,0,sizeof(cur));
+    pq.push({sum,0});
+    while(k--){
+        pr x=pq.top();
+        pq.pop();
+        printf("%lld\n",x.first);
+        ll &c=cur[x.second];
+        if(c==0 && x.second<posN-1){
+            pq.push({ps[x.second+1].first+sum,x.second+1});
+        }
+        c++;
+        if (c < negN)
+            pq.push({ps[x.second].first + sum + ng[c].first, x.second});
+    }
+    return 0;
+}
