@@ -1,0 +1,82 @@
+#include <bits/stdc++.h>
+#include <ext/pb_ds/assoc_container.hpp> // Common file
+#include <ext/pb_ds/tree_policy.hpp> // Including tree_order_statistics_node_update
+#include <ext/pb_ds/detail/standard_policies.hpp>
+
+#define pr pair<ll,ll>
+#define loop(i,n) for(ll i=0 ; i<n ; i++)
+#define rep(i,x,n) for(ll i=x ; i<=n ; i++)
+#define PI 3.141592654
+typedef long long ll;
+
+using namespace std;
+using namespace __gnu_pbds;
+
+typedef tree<
+        int,
+        null_type,
+        less_equal<ll>,
+        rb_tree_tag,
+        tree_order_statistics_node_update>
+        ordered_set;
+
+
+const int N = 1e6 + 5, MX = 2e5, MN = 0,MOD=1e4+7;
+int sz;
+vector<int> vec;
+int getAns(int ind){
+    int st=0,en=ind,res=0;
+    while(st<sz){
+        res+=vec[st++]*vec[en--];
+        res%=MOD;
+        if(en<0)en=sz-1;
+    }
+    return res;
+}
+int getAns2(int ind){
+    int st=0,en=ind,res=0;
+    while(st<sz){
+        res+=vec[st++]*vec[en--];
+        res%=MOD;
+        if(en<0)break;
+    }
+    return res;
+}
+int main() {
+#ifndef ONLINE_JUDGE
+    freopen("in.txt", "rt", stdin);
+#endif
+    // ios_base::sync_with_stdio(0), cin.tie(0), cout.tie(0);
+    int lst=2,preLst=1;
+    map<pr,bool> mp;
+    mp[{1,2}]=1;
+    int cnt=0;
+    vec.push_back(1);
+    while(true){
+        cnt++;
+        int tmp=lst;
+        lst=2*lst+2*preLst;
+        lst%=MOD;
+        preLst=tmp;
+        if(mp[{preLst,lst}])break;
+        vec.push_back(preLst);
+        mp[{preLst,lst}]=1;
+    }
+    sz=vec.size();
+    int n;
+    while(scanf("%d",&n) && ~n){
+        ll st=0,en=n/sz,diff=en-st;
+        ll ans=0;
+        int init=getAns(n%sz);
+        if(diff&1){
+            ans+=init;
+        }
+        diff/=2;
+        ans+=diff*init*2;
+        ans%=MOD;
+        ans+=getAns2(n%sz);
+        ans%=MOD;
+        printf("%lld\n",ans);
+    }
+    return 0;
+}
