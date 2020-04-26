@@ -1,0 +1,70 @@
+#include <bits/stdc++.h>
+#include <ext/pb_ds/assoc_container.hpp> // Common file
+#include <ext/pb_ds/tree_policy.hpp> // Including tree_order_statistics_node_update
+#include <ext/pb_ds/detail/standard_policies.hpp>
+
+#define pr pair<int,int>
+#define loop(i,n) for(int i=0 ; i<n ; i++)
+#define rep(i,x,n) for(ll i=x ; i<=n ; i++)
+typedef long long ll;
+
+using namespace std;
+using namespace __gnu_pbds;
+
+typedef tree<
+        ll,
+        null_type,
+        less<ll>,
+        rb_tree_tag,
+        tree_order_statistics_node_update>
+        ordered_set;
+
+
+const ll N = 1e4 + 5, MX = 1e7, MN = 0,MOD=1e4+7;
+int ind[N];
+int main() {
+#ifndef ONLINE_JUDGE
+  //  freopen("in.txt", "rt", stdin);
+#endif
+    ios_base::sync_with_stdio(0), cin.tie(0), cout.tie(0);
+    vector<string> vec;
+    map<string,int> mp;
+    for(char ch1='a' ; ch1<='z' ; ch1++){
+        for(char ch2='a' ; ch2<='z' ; ch2++){
+            for(char ch3='a' ; ch3<='z' ; ch3++){
+                string str="";
+                str+=ch1;
+                str+=ch2;
+                str+=ch3;
+                mp[str]=vec.size();
+                vec.push_back(str);
+            }
+        }
+    }
+    string t;
+    cin>>t;
+    vector<string> ans;
+    loop(i,3){
+        cout<<"? ";
+        loop(j,t.size()){
+            cout<<vec[j][i];
+        }
+        cout<<endl;
+        string tmp;
+        cin>>tmp;
+        ans.push_back(tmp);
+    }
+    loop(i,t.size()){
+        string str="";
+        str+=ans[0][i];
+        str+=ans[1][i];
+        str+=ans[2][i];
+        ind[mp[str]] = i;
+    }
+    cout<<"! ";
+    loop(i,t.size()){
+        cout<<t[ind[i]];
+    }
+    cout<<endl;
+    return 0;
+}
