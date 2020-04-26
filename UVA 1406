@@ -1,0 +1,48 @@
+#include <stdio.h>
+#include <string.h>
+#include <iostream>
+using namespace std;
+int table[16][65536];
+int main() {
+#ifndef ONLINE_JUDGE
+    freopen("in.txt", "rt", stdin);
+#endif
+    int n, cases = 0;
+    char cmd[10];
+    while(scanf("%d", &n) == 1 && n != -1) {
+        memset(table, 0, sizeof(table));
+        long long ret = 0;
+        int i, j, k, P, T;
+        for(i = 0; i < n; i++) {
+            scanf("%d", &P);
+            for(j = 0; j < 16; j++)
+                table[j][P%(1<<(j+1))]++;
+        }
+        for(i = 0; i < 16; i++) {
+            for(j = 1; j < 65536; j++)
+                table[i][j] += table[i][j-1];
+        }
+        int S = 0;
+        while(scanf("%s", cmd) == 1) {
+            if(cmd[0] == 'E')   break;
+            scanf("%d", &T);
+            if(cmd[0] == 'C') {
+                S += T;
+                S %= 65536;
+            } else {
+                i = 1<<T, j = 1<<(T+1);
+                int sub = 0;
+                int l = ((i-S)%j+j)%j, r = j-1;
+                if(l <= i) {
+                    sub = table[T][((j-S)%j + j -1)%j]- (l ? table[T][l-1] : 0);
+                } else {
+                    sub = table[T][r] - (l ? table[T][l-1] : 0);
+                    sub += table[T][((j-S)%j + j -1)%j];
+                }
+                ret += sub;
+            }
+        }
+        printf("Case %d: %lld\n", ++cases, ret);
+    }
+    return 0;
+}
