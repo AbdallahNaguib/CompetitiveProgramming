@@ -1,0 +1,89 @@
+#include <bits/stdc++.h>
+#include <ext/pb_ds/assoc_container.hpp> // Common file
+#include <ext/pb_ds/tree_policy.hpp> // Including tree_order_statistics_node_update
+#include <ext/pb_ds/detail/standard_policies.hpp>
+
+#define pr pair<int,int>
+#define loop(i,n) for(int i=0 ; i<n ; i++)
+#define rep(i,x,n) for(ll i=x ; i<=n ; i++)
+typedef long long ll;
+
+using namespace std;
+using namespace __gnu_pbds;
+
+typedef tree<
+        ll,
+        null_type,
+        less<ll>,
+        rb_tree_tag,
+        tree_order_statistics_node_update>
+        ordered_set;
+
+
+const ll N = 1e4 + 5, MX = 1e7, MN = 0,MOD=1e4+7;
+class OneDimensionalBalls{
+public:
+    long long countValidGuesses(vector <int> firstPicture, vector <int> secondPicture){
+        ll ans=0;
+        int n=firstPicture.size();
+        int m=secondPicture.size();
+        map<int,bool> vis;
+        vis[0]=1;
+        loop(k,m){
+            int diff = abs(firstPicture[0]-secondPicture[k]);
+            if(vis[diff])continue;
+            vis[diff]=1;
+            vector<vector<int>> graph(n+m);
+            loop(i,n){
+                loop(j,m){
+                    if(abs(firstPicture[i]-secondPicture[j]) == diff){
+                        graph[i].push_back(n+j);
+                        graph[n+j].push_back(i);
+                    }
+                }
+            }
+            vector<int> cmp(n+m);
+            loop(i,n+m){
+                cmp[i]=-1;
+            }
+            int cmpId=0;
+            loop(i,n){
+                if(cmp[i]==-1){
+                    dfs(graph,cmp,cmpId++,i);
+                }
+            }
+            vector<int> cnt(cmpId);
+            vector<int> hasOne(cmpId);
+            loop(i,cmpId){
+                cnt[i]=0;
+                hasOne[i]=0;
+            }
+            bool bad=false;
+            loop(j,n){
+                cnt[cmp[j]]++;
+                if(graph[j].size()==0){
+                    bad=true;
+                    break;
+                }else if(graph[j].size()==1){
+                    hasOne[cmp[j]]++;
+                }
+            }
+            if(bad)continue;
+            ll cur=1;
+            loop(i,cmpId){
+                if(hasOne[i]>1)cur*=0;
+                if(hasOne[i])continue;
+                cur*=(cnt[i]+1);
+            }
+            ans+=cur;
+        }
+        return ans;
+    }
+    void dfs(vector<vector<int>> &graph,vector<int> &cmp,int cmpId,int u,int p=-1){
+        cmp[u]=cmpId;
+        for(int v:graph[u]){
+            if(v==p)continue;
+            dfs(graph,cmp,cmpId,v,u);
+        }
+    }
+};
