@@ -1,0 +1,112 @@
+#include <bits/stdc++.h>
+#include <ext/pb_ds/assoc_container.hpp> // Common file
+#include <ext/pb_ds/tree_policy.hpp> // Including tree_order_statistics_node_update
+#include <ext/pb_ds/detail/standard_policies.hpp>
+
+#define pr pair<int,int>
+#define prr pair<pr,int>
+#define loop(i,n) for(int i=0 ; i<n ; i++)
+#define rep(i,x,n) for(ll i=x ; i<=n ; i++)
+typedef long long ll;
+
+using namespace std;
+using namespace __gnu_pbds;
+
+typedef tree<
+        ll,
+        null_type,
+        less<ll>,
+        rb_tree_tag,
+        tree_order_statistics_node_update>
+        ordered_set;
+
+
+const ll N = 1e5 + 5, MX = 1e7, MN = 0,MOD=1e4+7;
+int arr[N],nodeInd[N],subSize[N],n,q,sz,cnt[N],com[N],color[N];
+vector<int> graph[N];
+pair<pr,pr> queries[N];
+int sol[N];
+void remove(int col){
+    col = color[arr[col]];
+    com[cnt[col]]--;
+    cnt[col]--;
+}
+void add(int col){
+    col = color[arr[col]];
+    cnt[col]++;
+    com[cnt[col]]++;
+}
+void dfs(int u=1,int par=-1){
+    nodeInd[u]=sz;
+    arr[sz++]=u;
+    subSize[u]=1;
+    for(int v:graph[u]){
+        if(v==par)continue;
+        dfs(v,u);
+        subSize[u]+=subSize[v];
+    }
+}
+int main() {
+#ifndef ONLINE_JUDGE
+    freopen("in.txt", "rt", stdin);
+#endif
+   // ios_base::sync_with_stdio(0), cin.tie(0), cout.tie(0);
+    scanf("%d %d",&n,&q);
+    set<int> st;
+    rep(i,1,n){
+        scanf("%d",color+i);
+        st.insert(color[i]);
+    }
+    loop(i,n-1){
+        int u,v;
+        scanf("%d %d",&u,&v);
+        graph[u].push_back(v);
+        graph[v].push_back(u);
+    }
+    dfs();
+    loop(i,q){
+        int u,k;
+        scanf("%d %d",&u,&k);
+        int l=nodeInd[u];
+        int r=l+subSize[u]-1;
+        queries[i]={{l,r},{i,k}};
+    }
+    int sq = sqrt(n);
+    sort(queries,queries+q,[sq](pair<pr,pr> q1,pair<pr,pr> q2){
+        int lf1=q1.first.first/sq;
+        int lf2=q2.first.first/sq;
+        if(lf1!=lf2)return lf1<lf2;
+        return q1.first.second<q2.first.second;
+    });
+    int currentL=queries[0].first.first;
+    int currentR=queries[0].first.second;
+    com[0]=st.size();
+    rep(i,currentL,currentR){
+        add(i);
+    }
+    sol[queries[0].second.first]=com[queries[0].second.second];
+    rep(i,1,q-1){
+        if(i==4){
+            i=4;
+        }
+        int ql=queries[i].first.first;
+        int qr=queries[i].first.second;
+        while(currentL>ql){
+            add(--currentL);
+        }
+        while(currentR<qr){
+            add(++currentR);
+        }
+        while(currentL<ql){
+            remove(currentL++);
+        }
+        while(currentR>qr){
+            remove(currentR--);
+        }
+        sol[queries[i].second.first]=com[queries[i].second.second];
+    }
+    loop(i,q){
+        printf("%d\n",sol[i]);
+    }
+    return 0;
+}
