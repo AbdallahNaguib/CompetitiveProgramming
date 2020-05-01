@@ -1,0 +1,90 @@
+#include <bits/stdc++.h>
+#include <ext/pb_ds/assoc_container.hpp> // Common file
+#include <ext/pb_ds/tree_policy.hpp> // Including tree_order_statistics_node_update
+#include <ext/pb_ds/detail/standard_policies.hpp>
+
+#define pr pair<int,int>
+#define loop(i,n) for(int i=0 ; i<n ; i++)
+#define rep(i,x,n) for(ll i=x ; i<=n ; i++)
+typedef long long ll;
+
+using namespace std;
+using namespace __gnu_pbds;
+
+typedef tree<
+        ll,
+        null_type,
+        less<ll>,
+        rb_tree_tag,
+        tree_order_statistics_node_update>
+        ordered_set;
+
+
+const ll N = 1e2 + 5, MX = 1e18, MN = 0,MOD=1e4+7;
+int n,k;
+struct mat{
+    ll **arr;
+    int x;
+    mat(){}
+    mat(int x):x(x){
+        arr=new ll*[x];
+        loop(i,x){
+            arr[i]=new ll[x];
+        }
+    }
+    mat operator*(mat m2){
+        mat res(x);
+        loop(i,x){
+            loop(j,x){
+                res.arr[i][j]=MX;
+                loop(l,x){
+                    res.arr[i][j]=min(res.arr[i][j],arr[i][l]+m2.arr[l][j]);
+                }
+            }
+        }
+        return res;
+    }
+};
+mat matPow(mat m,int p){
+    if(p==1)return m;
+    mat mp2=m*m;
+    if(p&1)return matPow(mp2,p/2)*m;
+    return matPow(mp2,p/2);
+}
+ll res[N][N];
+int main() {
+#ifndef ONLINE_JUDGE
+    freopen("std/in.txt", "rt", stdin);
+  //  freopen("std/out.txt", "wt", stdout);
+#endif
+    // ios_base::sync_with_stdio(0), cin.tie(0), cout.tie(0);
+    int t;
+    scanf("%d",&t);
+    int tst=1;
+    while(t--){
+        scanf("%d %d",&k,&n);
+        mat m(n);
+        loop(i,n){
+            loop(j,n){
+                scanf("%lld",&m.arr[i][j]);
+            }
+        }
+        memset(res,'?',sizeof(res));
+        printf("Region #%d:\n",tst++);
+        rep(p,k,k+n){
+            mat mp=matPow(m,p);
+            loop(i,n){
+                loop(j,n){
+                    res[i][j]=min(res[i][j],mp.arr[i][j]);
+                }
+            }
+        }
+        loop(i,n){
+            loop(j,n){
+                printf("%lld%c",res[i][j]," \n"[j==n-1]);
+            }
+        }
+        printf("\n");
+    }
+    return 0;
+}
