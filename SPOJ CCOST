@@ -1,0 +1,126 @@
+#include <bits/stdc++.h>
+#include <ext/pb_ds/assoc_container.hpp> // Common file
+#include <ext/pb_ds/tree_policy.hpp> // Including tree_order_statistics_node_update
+#include <ext/pb_ds/detail/standard_policies.hpp>
+
+#define pr pair<int,int>
+#define loop(i,n) for(int i=0 ; i<n ; i++)
+#define rep(i,x,n) for(int i=x ; i<=n ; i++)
+typedef long long ll;
+
+using namespace std;
+using namespace __gnu_pbds;
+
+typedef tree<
+        ll,
+        null_type,
+        less<ll>,
+        rb_tree_tag,
+        tree_order_statistics_node_update>
+        ordered_set;
+
+
+const ll N = 1e6 + 5, MX = 1e7, MN = 0,MOD=1e4+7;
+int n,r;
+int x[N],y[N],v[N];
+int qxl[N],qyl[N],qxr[N],qyr[N],ansQ[N];
+
+struct BIT{
+    int *arr,sz;
+    BIT(int n2=MX){
+        sz=(1<<int(ceil(log2(n2))));
+        arr=new int[sz];
+        memset(arr,0,sz*sizeof(arr[0]));
+    }
+
+    void add(int i,int val){
+        for(i++;i<=sz;i+=(i&-i))
+            arr[i]+=val;
+    }
+    int get(int i){
+        int res=0;
+        for(i++;i;i-=(i&-i))
+            res+=arr[i];
+        return res;
+    }
+    int get(int st,int en){
+        if(st)
+            return get(en)-get(st-1);
+        return get(en);
+    }
+    ~BIT(){
+        delete arr;
+    }
+};
+struct abdo{
+    int x=0,y=0,y2=0,val=0,qId=0;
+    bool is[3]={0,0,0};
+    bool operator<(const abdo &a2)const{
+        if(x!=a2.x)return x<a2.x;
+        loop(i,3){
+            if(this->is[i] && !a2.is[i]){
+                return true;
+            }else if(!this->is[i] && a2.is[i]){
+                return false;
+            }
+        }
+        return false;
+    }
+};
+int main() {
+#ifndef ONLINE_JUDGE
+    freopen("std/in.txt", "rt", stdin);
+#endif
+    // ios_base::sync_with_stdio(0), cin.tie(0), cout.tie(0);
+    int t;
+    scanf("%d",&t);
+    while(t--){
+        scanf("%d",&n);
+        loop(i,n){
+            scanf("%d %d %d",x+i,y+i,v+i);
+        }
+        scanf("%d",&r);
+        loop(i,r){
+            scanf("%d %d %d %d",qxl+i,qyl+i,qxr+i,qyr+i);
+        }
+        vector<abdo> events;
+        loop(i,n){
+            abdo a;
+            a.x = x[i];
+            a.y = y[i];
+            a.val = v[i];
+            a.is[1] = 1;
+            events.push_back(a);
+        }
+        loop(i,r){
+            abdo a,b;
+            a.x = qxl[i];
+            a.y = qyl[i];
+            a.y2 = qyr[i];
+            a.qId=b.qId=i;
+            a.is[0]=1;
+            events.push_back(a);
+
+            b.x = qxr[i];
+            b.y = qyl[i];
+            b.y2 = qyr[i];
+            b.is[2]=1;
+            events.push_back(b);
+        }
+        sort(events.begin(),events.end());
+        BIT bit;
+        for(abdo a:events){
+            if(a.is[0]){
+                ansQ[a.qId] = bit.get(a.y,a.y2);
+            }else if(a.is[1]){
+                bit.add(a.y,a.val);
+            }else{
+                ansQ[a.qId] = bit.get(a.y,a.y2) - ansQ[a.qId];
+            }
+        }
+        loop(i,r){
+            printf("%d\n",ansQ[i]);
+        }
+    }
+    return 0;
+}
