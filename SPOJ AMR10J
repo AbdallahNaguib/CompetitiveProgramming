@@ -1,0 +1,162 @@
+#include <bits/stdc++.h>
+#include <ext/pb_ds/assoc_container.hpp> // Common file
+#include <ext/pb_ds/tree_policy.hpp> // Including tree_order_statistics_node_update
+#include <ext/pb_ds/detail/standard_policies.hpp>
+
+#define pr pair<ll,ll>
+#define loop(i,n) for(ll i=0 ; i<n ; i++)
+#define rep(i,x,n) for(ll i=x ; i<=n ; i++)
+typedef long long ll;
+
+using namespace std;
+using namespace __gnu_pbds;
+
+typedef tree<
+        ll,
+        null_type,
+        less<ll>,
+        rb_tree_tag,
+        tree_order_statistics_node_update>
+        ordered_set;
+
+
+const ll N = 1e2 + 5, MX = 1e6, MN = 0,MOD=1e9+7;
+vector<ll> graph[N];
+vector<vector<ll>> cmp;
+ll n,k;
+ll in[N][N];
+ll vis[N],vid;
+void init(){
+    loop(i,n){
+        graph[i].clear();
+    }
+    cmp.clear();
+    vid++;
+}
+void dfs(ll u,vector<ll> &cur){
+    cur.push_back(u);
+    for(ll v:graph[u]){
+        if(vis[v]==vid)continue;
+        vis[v]=vid;
+        dfs(v,cur);
+    }
+}
+ll getNumberOfEdgesInCmp(vector<ll> &cur){
+    ll degree=0;
+    for(ll x:cur){
+        degree+=graph[x].size();
+    }
+    return degree/2;
+}
+ll fastPow(ll x,ll p){
+    if(p==0)return 1;
+    if(p==1)return x;
+    ll res=fastPow((x*x)%MOD,p/2);
+    if(p&1)res*=x;
+    res%=MOD;
+    return res;
+}
+ll getAnsForPath(ll sz){
+    return k*fastPow(k-1,sz-1)%MOD;
+}
+ll par[N],cmpSize[N];
+ll getPar(ll x){
+    if(par[x]==x)return x;
+    return par[x]=getPar(par[x]);
+}
+void unify(ll x,ll y){
+    ll parX=getPar(x);
+    ll parY=getPar(y);
+    if(parX==parY)return;
+    if(cmpSize[parX]>cmpSize[parY]){
+        cmpSize[parX]+=cmpSize[parY];
+        par[parY]=parX;
+    }else{
+        cmpSize[parY]+=cmpSize[parX];
+        par[parX]=parY;
+    }
+}
+void initForDisjoll(){
+    loop(i,n){
+        par[i]=i;
+        cmpSize[i]=1;
+    }
+}
+ll cycle[N];
+ll getCycleSize(vector<ll> &cur){
+    set<pair<ll,ll>> edges;
+    loop(i,cur.size()){
+        ll x=cur[i];
+        for(ll v:graph[x]){
+            edges.insert({min(x,v),max(x,v)});
+        }
+    }
+    ll res=0;
+    for(pair<ll,ll> edge:edges){
+        initForDisjoll();
+        for(pair<ll,ll> edge2:edges){
+            if(edge2==edge)continue;
+            unify(edge2.first,edge2.second);
+        }
+        if(cmpSize[getPar(cur[0])]==cur.size()){
+            res++;
+        }
+    }
+    return res;
+}
+int main() {
+#ifndef ONLINE_JUDGE
+    freopen("std/in.txt", "rt", stdin);
+   // freopen("std/out.txt", "wt", stdout);
+#endif
+    // ios_base::sync_with_stdio(0), cin.tie(0), cout.tie(0);
+    ll t;
+    scanf("%lld",&t);
+    while(t--){
+        scanf("%lld %lld",&n,&k);
+        cycle[1]=k;
+        cycle[2]=k*(k-1);
+        cycle[3]=k*(k-1)*(k-2);
+        cycle[3]%=MOD;
+        rep(i,4,n){
+            cycle[i]=(getAnsForPath(i) - cycle[i-1] + MOD)%MOD;
+        }
+        init();
+        loop(i,n){
+            ll x;
+            scanf("%lld",&x);
+            if(in[i][x]==vid)continue;
+            in[i][x]=vid;
+            in[x][i]=vid;
+            graph[i].push_back(x);
+            graph[x].push_back(i);
+        }
+        loop(i,n){
+            if(vis[i]==vid)continue;
+            vis[i]=vid;
+            vector<ll> cur;
+            dfs(i,cur);
+            cmp.push_back(cur);
+        }
+        ll ans=1;
+        loop(i,cmp.size()){
+            vector<ll> cur=cmp[i];
+            ll edges=getNumberOfEdgesInCmp(cur);
+            if(edges<cur.size()){
+                // then cmp doesn't have cycles
+                ans*=getAnsForPath(cur.size());
+                ans%=MOD;
+            }else{
+                // get cycle size
+                ll cSz=getCycleSize(cur);
+                ll lft=cur.size()-cSz;
+                ans*=fastPow(k-1,lft);
+                ans%=MOD;
+                ans*=cycle[cSz];
+                ans%=MOD;
+            }
+        }
+        printf("%lld\n",ans);
+    }
+    return 0;
+}
