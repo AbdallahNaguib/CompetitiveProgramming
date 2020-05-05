@@ -1,0 +1,82 @@
+#include <bits/stdc++.h>
+#include <ext/pb_ds/assoc_container.hpp> // Common file
+#include <ext/pb_ds/tree_policy.hpp> // Including tree_order_statistics_node_update
+#include <ext/pb_ds/detail/standard_policies.hpp>
+
+#define pr pair<int,int>
+#define loop(i,n) for(int i=0 ; i<n ; i++)
+#define rep(i,x,n) for(int i=x ; i<=n ; i++)
+typedef long long ll;
+
+using namespace std;
+using namespace __gnu_pbds;
+
+typedef tree<
+        ll,
+        null_type,
+        less<ll>,
+        rb_tree_tag,
+        tree_order_statistics_node_update>
+        ordered_set;
+
+
+const ll N = 1e5 + 5, MX = 1e6, MN = 0,MOD=1e9+7;
+vector<int> graph[N];
+int n,m;
+int cmpCnt,cmpSz[N],vis[N],vid;
+void dfs(int u){
+    cmpSz[cmpCnt]++;
+    for(int v:graph[u]){
+        if(vis[v]==vid)continue;
+        vis[v]=vid;
+        dfs(v);
+    }
+}
+void init(){
+    vid++;
+    cmpCnt=0;
+    memset(cmpSz,0,sizeof(cmpSz));
+    rep(i,1,n){
+        graph[i].clear();
+    }
+}
+int main() {
+#ifndef ONLINE_JUDGE
+    freopen("std/in.txt", "rt", stdin);
+   // freopen("std/out.txt", "wt", stdout);
+#endif
+    // ios_base::sync_with_stdio(0), cin.tie(0), cout.tie(0);
+    int t;
+    scanf("%d",&t);
+    while(t--){
+        scanf("%d %d",&n,&m);
+        init();
+        loop(i,m){
+            int u,v;
+            scanf("%d %d",&u,&v);
+            graph[u].push_back(v);
+            graph[v].push_back(u);
+        }
+        rep(i,1,n){
+            if(vis[i]==vid)continue;
+            vis[i]=vid;
+            dfs(i);
+            cmpCnt++;
+        }
+        if(cmpCnt==1){
+            printf("-1\n");
+            continue;
+        }
+        ll res=1;
+        loop(i,cmpCnt){
+            res*=cmpSz[i];
+            res%=MOD;
+        }
+        loop(i,cmpCnt-2){
+            res*=n;
+            res%=MOD;
+        }
+        printf("%lld\n",res);
+    }
+    return 0;
+}
