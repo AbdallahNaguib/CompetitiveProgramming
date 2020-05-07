@@ -1,0 +1,54 @@
+#include "bits/stdc++.h"
+#define loop(i,n) for(int i=0 ; i<n ; i++)
+
+using namespace std;
+const int N = 1e5+5,sq = 333;
+int l[N], r[N], od[N], tot[N], sg[N];
+vector<int> p[N];
+int main(){
+#ifndef ONLINE_JUDGE
+    freopen("std/in.txt", "rt", stdin);
+   // freopen("std/out.txt", "wt", stdout);
+#endif
+    int t; scanf("%d", &t);
+    while(t--){
+        int n; scanf("%d", &n);
+        for(int i = 1; i <= n; i++) p[i].clear();
+        for(int i = 1; i <= n; i++) scanf("%d %d", l + i, r + i);
+        loop(i,n+5)od[i]=i;
+        
+        sort(od + 1, od + n + 1, [&](int a, int b){
+            if(l[a]/sq != l[b]/sq) return l[a]/sq < l[b]/sq;
+            return r[a] < r[b];
+        });
+
+        for(int i = 1; i <= n; i++) sg[i] = 1;
+        int m;
+        scanf("%d", &m);
+        memset(tot,0,(m+5) * sizeof(tot[0]));
+        for(int i = 1; i <= m; i++){
+            int c; scanf("%d", &c);
+            while(c--){
+                int x; scanf("%d", &x);
+                p[x].push_back(i);
+            }
+        }
+        int ll = 1, rr = 0;
+        for(int i = 1; i <= n; i++){
+            auto push = [&](int u){
+                for(int qNum : p[u]){
+                    tot[qNum] += sg[qNum] * (n - i + 1);
+                    sg[qNum] *= -1;
+                }
+            };
+            while(rr < r[od[i]]) push(++rr);
+            while(ll < l[od[i]]) push(ll++);
+
+            while(ll > l[od[i]]) push(--ll);
+            while(rr > r[od[i]]) push(rr--);
+        }
+        for(int i = 1; i <= m; i++)
+            printf("%d\n", tot[i]);
+    }
+    return 0;
+}
