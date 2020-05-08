@@ -1,0 +1,103 @@
+#include <bits/stdc++.h>
+#include <ext/pb_ds/assoc_container.hpp> // Common file
+#include <ext/pb_ds/tree_policy.hpp> // Including tree_order_statistics_node_update
+#include <ext/pb_ds/detail/standard_policies.hpp>
+
+#define pr pair<int,int>
+#define loop(i,n) for(int i=0 ; i<n ; i++)
+#define rep(i,x,n) for(int i=x ; i<=n ; i++)
+typedef long long ll;
+
+using namespace std;
+using namespace __gnu_pbds;
+
+typedef tree<
+        ll,
+        null_type,
+        less<ll>,
+        rb_tree_tag,
+        tree_order_statistics_node_update>
+        ordered_set;
+
+
+const ll N = 1e3 + 5, MX = 1e7, MN = 0,MOD=1e4+7;
+int n,m;
+int node1[N],node2[N],par[N],cmpSize[N];
+int getPar(int x){
+    if(par[x]==x)return x;
+    return par[x]=getPar(par[x]);
+}
+void unify(int x,int y){
+    int parX=getPar(x);
+    int parY=getPar(y);
+    if(parX==parY)return;
+    if(cmpSize[parX]>cmpSize[parY]){
+        cmpSize[parX]+=cmpSize[parY];
+        par[parY]=parX;
+    }else{
+        cmpSize[parY]+=cmpSize[parX];
+        par[parX]=parY;
+    }
+}
+void initDSU(){
+    rep(i,1,n){
+        par[i]=i;
+        cmpSize[i]=1;
+    }
+}
+int main() {
+#ifndef ONLINE_JUDGE
+    freopen("std/in.txt", "rt", stdin);
+  //  freopen("std/out.txt", "wt", stdout);
+#endif
+    // ios_base::sync_with_stdio(0), cin.tie(0), cout.tie(0);
+    int t;
+    scanf("%d",&t);
+    rep(tst,1,t){
+        scanf("%d %d",&n,&m);
+        loop(i,m){
+            int u,v;
+            scanf("%d %d",&u,&v);
+            node1[i]=u;
+            node2[i]=v;
+        }
+        vector<int> cyclesEdges;
+        loop(i,m){
+            initDSU();
+            loop(j,m){
+                if(i==j)continue;
+                unify(node1[j],node2[j]);
+            }
+            if(cmpSize[getPar(1)]==n){
+                // it's a cycle edge
+                cyclesEdges.push_back(i);
+            }
+        }
+        set<set<int>> cycles;
+        loop(i,cyclesEdges.size()){
+            int edgeId=cyclesEdges[i];
+            set<int> curCycle;
+            curCycle.insert(edgeId);
+            loop(j,cyclesEdges.size()){
+                if(i==j)continue;
+                int edgeId2=cyclesEdges[j];
+                initDSU();
+                loop(k,m){
+                    if(k==edgeId or k==edgeId2)continue;
+                    unify(node1[k],node2[k]);
+                }
+                if(cmpSize[getPar(1)]<n){
+                    // they are in the same cycle
+                    curCycle.insert(edgeId2);
+                }
+            }
+            cycles.insert(curCycle);
+        }
+        unsigned long long res=1UL;
+        for(set<int> st:cycles){
+            res*=st.size();
+        }
+        cout<<"Case "<<tst<<": "<<res<<endl;
+    }
+    return 0;
+}
