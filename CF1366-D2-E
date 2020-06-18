@@ -58,12 +58,12 @@ int main() {
         return 0;
     }
     int it=0;
-    vector<int> fuck;
+    vector<int> any;
     int lst=-1;
     for(int i=indices[0] ; i<n and it<m ; i++){
         if(i==indices[it]){
             if(lst!=-1){
-                fuck.push_back(lst);
+                any.push_back(lst);
             }
             lst=-1;
             it++;
@@ -85,7 +85,7 @@ int main() {
     ll res=1;
     indices.erase(indices.begin());
     loop(i,indices.size()){
-        res*=indices[i] - fuck[i];
+        res*=indices[i] - any[i];
         res%=MOD;
     }
     printf("%lld\n",res);
