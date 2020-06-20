@@ -1,0 +1,116 @@
+#pragma GCC optimize ("O3")
+
+#include <bits/stdc++.h>
+#include <ext/pb_ds/assoc_container.hpp>
+#include <unistd.h>
+
+#define ll long long
+#define lst(x) x.size()-1
+#define ld long double
+#define pr pair<ll,ll>
+#define loop(i, n) for(int i=0 ; i<n ; ++i)
+#define rep(i, x, n) for(int i=x ; i<=n ; ++i)
+#define iteloop(type, data, name, it) for(type<data>::iterator it=name.begin() ;it!=name.end() ; ++it)
+
+using namespace __gnu_pbds;
+using namespace std;
+
+template<typename T>
+using os = tree<T, null_type, less<T>, rb_tree_tag,
+        tree_order_statistics_node_update>;
+
+const ll N = 2e5 + 5, M = 2e3 + 5, MX = 1e9 + 5,MN = -MX ;
+extern struct node *empty;
+ll solve(const pair<ll, ll> &line, ll x){
+    return line.first * x + line.second;
+}
+bool les(int x, pr pt) {
+    if (pt.first % pt.second == 0)return x < pt.first / pt.second;
+    return x <= pt.first / pt.second;
+}
+bool more(int x,pr pt){
+    return x > pt.first/pt.second;
+}
+pr intersect(const pr &a, const pr &b){
+    return {b.second - a.second, a.first - b.first};
+}
+
+struct node {
+    node *lf, *rt;
+    pr line;
+    node() : lf(this), rt(this), line({0, 0}) {}
+    ll solve(ll x) {
+        if(this==empty)return -1e18;
+        return x * line.first + line.second;
+    }
+    node(const pr &line, node *lf = empty, node *rt = empty) : line(line), lf(lf), rt(rt) {}
+};
+node* empty=new node();
+void insert(pr line, node *&cur, int ns = MN, int ne = MX) {
+    if (cur == empty) {
+        cur = new node(line);
+        return;
+    }
+    pr intPoint = intersect(line,cur->line);
+    if(!intPoint.second or les(ne, intPoint) or more(ns,intPoint)){
+        ll a1 = solve(line,ns);
+        ll a2 = cur->solve(ns);
+        if(a1>a2)cur->line = line;
+        return;
+    }
+    int mid=ns+(ne-ns)/2;
+    if(!les(mid,intPoint)){
+        ll a1 = solve(line,ne);
+        ll a2 = solve(cur->line,ne);
+        if(a1>a2)swap(cur->line,line);
+        if(ns!=mid)insert(line,cur->lf,ns,mid);
+    }else{
+        ll a1 = solve(line,ns);
+        ll a2 = solve(cur->line,ns);
+        if(a1>a2)swap(cur->line,line);
+        if(mid+1!=ne)insert(line,cur->rt,mid+1,ne);
+    }
+}
+ll query(ll x,node *&cur,int ns=MN,int ne=MX){
+    if(x<ns or x>ne)return -1e18;
+    ll s=cur->solve(x);
+    if(ns==ne)return s;
+    int mid=ns+(ne-ns)/2;
+    return max({s,query(x,cur->lf,ns,mid),query(x,cur->rt,mid+1,ne)});
+}
+int n;
+ll com[N],arr[N];
+int main() {
+#ifndef ONLINE_JUDGE
+    freopen("std/in.txt", "rt", stdin);
+    // freopen("out.txt", "wt", stdout);
+#endif
+    scanf("%d", &n);
+    rep(i,1, n) {
+        scanf("%lld", &arr[i]);
+        com[i]=arr[i]+com[i-1];
+    }
+    ll ans;
+    ll bst=0;
+    node *root=empty;
+    rep(i,1,n){
+        ans=query(arr[i],root);
+        ans+=com[i-1];
+        ans-=i*arr[i];
+        bst=max(bst,ans);
+        insert({i,-com[i-1]},root);
+    }
+    root=empty;
+    for(int i=n ; i>0 ; --i){
+        ans=query(arr[i],root);
+        ans+=com[i];
+        ans-=i*arr[i];
+        bst=max(bst,ans);
+        insert({i,-com[i]},root);
+    }
+    rep(i,1,n){
+        bst+=arr[i]*i;
+    }
+    printf("%lld\n",bst);
+    return 0;
+}
