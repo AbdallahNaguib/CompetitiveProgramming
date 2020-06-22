@@ -1,0 +1,170 @@
+#include <bits/stdc++.h>
+#include <ext/pb_ds/assoc_container.hpp>
+#include <unistd.h>
+
+#define ll long long
+#define lst(x) x.size()-1
+#define ld double
+#define pr pair<ll,ll>
+#define loop(i, n) for(int i=0 ; i<n ; ++i)
+#define rep(i, x, n) for(int i=x ; i<=n ; ++i)
+#define iteloop(type, data, name, it) for(type<data>::iterator it=name.begin() ;it!=name.end() ; ++it)
+
+using namespace __gnu_pbds;
+using namespace std;
+
+template<typename T>
+using os = tree<T, null_type, less<T>, rb_tree_tag,
+        tree_order_statistics_node_update>;
+
+const int N = 1e3 + 5,level=15, M = 2e3 + 5, MX = 1e9 + 5,MN = -MX ;
+vector<int> graph[N],childs[N];
+int n,t,depth[N],parent[N][level];
+char res[15];
+void dfs(int u=1,int p=0){
+    depth[u] = depth[p]+1;
+    parent[u][0]=p;
+    for(int v:graph[u]){
+        if(v==p)continue;
+        childs[u].push_back(v);
+        dfs(v,u);
+    }
+}
+int vec[N],vecSz;
+void getAtDest(int x,int dist){
+    if(dist==0){
+        vec[vecSz++]=x;
+        return;
+    }
+    for(int v:childs[x]){
+        getAtDest(v,dist-1);
+    }
+}
+void precomputeSparseMatrix()
+{
+    for (int i=1; i<level; i++){
+        for (int node = 1; node <= n; node++){
+            parent[node][i] =-1;
+        }
+    }
+    for (int i=1; i<level; i++){
+        for (int node = 1; node <= n; node++)
+        {
+            if (parent[node][i-1] != -1)
+                parent[node][i] =
+                        parent[parent[node][i-1]][i-1];
+        }
+    }
+}
+
+// Returning the LCA of u and v
+// Time complexity : O(log n)
+int getLca(int u, int v){
+    if (depth[v] < depth[u])
+        swap(u, v);
+
+    int diff = depth[v] - depth[u];
+
+    // Step 1 of the pseudocode
+    for (int i=0; i<level; i++)
+        if ((diff>>i)&1)
+            v = parent[v][i];
+
+    // now depth[u] == depth[v]
+    if (u == v)
+        return u;
+
+    // Step 2 of the pseudocode
+    for (int i=level-1; i>=0; i--)
+        if (parent[u][i] != parent[v][i])
+        {
+            u = parent[u][i];
+            v = parent[v][i];
+        }
+
+    return parent[u][0];
+}
+int getDist(int u,int v){
+    int lca=getLca(u,v);
+    int d1=depth[u]-1;
+    int d2=depth[v]-1;
+    int d3=depth[lca]-1;
+    return d1+d2-2*d3;
+}
+int main() {
+#ifdef CLION
+    //  freopen("std/in.txt", "rt", stdin);
+    // freopen("out.txt", "wt", stdout);
+#endif
+    //ios_base::sync_with_stdio(false),cin.tie(nullptr);
+    scanf("%d",&t);
+    while(t--) {
+        scanf("%d", &n);
+        rep(i,1,n){
+            graph[i].clear();
+            childs[i].clear();
+        }
+        loop(i,n-1){
+            int u,v;
+            scanf("%d%d",&u,&v);
+            graph[u].push_back(v);
+            graph[v].push_back(u);
+        }
+        dfs();
+        precomputeSparseMatrix();
+        printf("? %d",n);
+        rep(i,1,n){
+            printf(" %d",i);
+        }
+        puts("");
+        fflush(stdout);
+        int node,oneAns,tmpSum,sum;
+        scanf("%d %d",&node,&sum);
+        int st=0,en=sum;
+        int bstAns;
+        while(st<=en){
+            int mid=(st+en)/2;
+            vecSz=0;
+            getAtDest(node,mid);
+            if(vecSz==0){
+                en=mid-1;
+                continue;
+            }
+            printf("? %d",vecSz);
+            loop(i,vecSz){
+                printf(" %d",vec[i]);
+            }
+            puts("");
+            fflush(stdout);
+            scanf("%d %d",&oneAns,&tmpSum);
+            if(tmpSum>sum){
+                en=mid-1;
+            }else{
+                bstAns=oneAns;
+                st=mid+1;
+            }
+        }
+        oneAns=bstAns;
+        // now we have one answer in oneAns
+        vecSz=0;
+        rep(i,1,n){
+            if(i==oneAns)continue;
+            int d=getDist(oneAns,i);
+            if(d==sum){
+                vec[vecSz++]=i;
+            }
+        }
+        printf("? %d",vecSz);
+        loop(i,vecSz){
+            printf(" %d",vec[i]);
+        }
+        puts("");
+        fflush(stdout);
+        scanf("%d %d",&node,&tmpSum);
+        printf("! %d %d\n",oneAns,node);
+        fflush(stdout);
+        scanf("%s",res);
+        if(res[0]=='I')break;
+    }
+    return 0;
+}
