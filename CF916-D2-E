@@ -1,0 +1,221 @@
+#include <bits/stdc++.h>
+#include <ext/pb_ds/assoc_container.hpp>
+#include <unistd.h>
+
+#define ll long long
+#define lst(x) x.size()-1
+#define ld double
+#define pr pair<ll,ll>
+#define loop(i, n) for(int i=0 ; i<n ; ++i)
+#define rep(i, x, n) for(int i=x ; i<=n ; ++i)
+#define iteloop(type, data, name, it) for(type<data>::iterator it=name.begin() ;it!=name.end() ; ++it)
+
+using namespace __gnu_pbds;
+using namespace std;
+
+template<typename T>
+using os = tree<T, null_type, less<T>, rb_tree_tag,
+        tree_order_statistics_node_update>;
+
+const int N = 1e5 + 5,level=20,MOD=1e9+7, M = 2e3 + 5, MX = 1e9 + 5,MN = -MX ;
+int n,q,root,val[N];
+vector<int> graph[N],childs[N];
+int curVal[N];
+struct node{
+    ll sum=0, lazy=0;
+}seg[N << 2];
+
+void pushDown(int ni, int ns, int ne)
+{
+    node& x = seg[ni];
+    if(!x.lazy or ns == ne) return;
+    int lf = ni * 2 + 1, rt = lf + 1, mid = ns + (ne - ns) / 2;
+    seg[lf].lazy += x.lazy;
+    seg[lf].sum += x.lazy * (mid - ns + 1);
+    seg[rt].lazy += x.lazy;
+    seg[rt].sum += x.lazy * (ne - mid);
+    x.lazy = 0;
+}
+
+void update(int qs, int qe, ll qv,  int ns , int ne ,int ni = 0)
+{
+    if(qs > ne or qe < ns) return;
+    pushDown(ni, ns, ne);
+    node& val = seg[ni];
+    if(ns >= qs and ne <= qe)
+    {
+        val.lazy += qv;
+        val.sum += qv * (ne - ns + 1);
+        return;
+    }
+    int lf = ni * 2 + 1, rt = lf + 1, mid = ns + (ne - ns)/2;
+    update(qs, qe, qv, ns, mid,lf);
+    update(qs, qe, qv,mid + 1, ne,rt);
+    val.sum = seg[lf].sum + seg[rt].sum;
+}
+
+ll query(int qs, int qe, int ns, int ne,int ni = 0)
+{
+    if(qs > ne or qe < ns) return 0;
+    pushDown(ni, ns, ne);
+    node& x = seg[ni];
+    if(ns >= qs and ne <= qe) return x.sum;
+    int lf = ni * 2 + 1, rt = lf + 1, mid = ns + (ne - ns)/2;
+    return query(qs, qe,  ns, mid,lf) +
+           query(qs, qe, mid + 1, ne,rt);
+}
+
+int arr[N],reversedArr[N],arrSz,sz[N],parent[N][level],depth[N];
+
+void precomputeSparseMatrix()
+{
+
+    for (int i=1; i<level; i++)
+    {
+        for (int node = 1; node <= n; node++)
+        {
+            if (parent[node][i-1] != -1)
+                parent[node][i] =
+                        parent[parent[node][i-1]][i-1];
+        }
+    }
+}
+bool checkIfInSubtree(int p,int x){
+    int pInd=reversedArr[p],xInd=reversedArr[x];
+    return xInd > pInd and xInd < pInd + sz[p];
+}
+int getLastBeforeLCA(int u,int v){
+    if(!checkIfInSubtree(u,v)){
+       return getLastBeforeLCA(v,u);
+    }
+    // u is a some parent of v
+    int st=0,en=(int)childs[u].size()-1;
+    while(st<=en){
+        int mid=(st+en)/2;
+        if(reversedArr[childs[u][mid]]>reversedArr[v]){
+            en=mid-1;
+        }else{
+            st=mid+1;
+        }
+    }
+    return childs[u][st-1];
+}
+int getLCA(int u, int v){
+    if (depth[v] < depth[u])
+        swap(u, v);
+
+    int diff = depth[v] - depth[u];
+
+    // Step 1 of the pseudocode
+    for (int i=0; i<level; i++)
+        if ((diff>>i)&1)
+            v = parent[v][i];
+
+    // now depth[u] == depth[v]
+    if (u == v)
+        return u;
+
+    // Step 2 of the pseudocode
+    for (int i=level-1; i>=0; i--)
+        if (parent[u][i] != parent[v][i])
+        {
+            u = parent[u][i];
+            v = parent[v][i];
+        }
+
+    return parent[u][0];
+}
+void update(int st,int en,int x){
+    update(st,en,x,0,n-1);
+}
+ll query(int st,int en){
+    return query(st,en,0,n-1);
+}
+void updateWithoutMe(int x,int u){
+    update(0,n-1,x);
+    update(reversedArr[u],reversedArr[u]+sz[u]-1,-x);
+}
+
+void dfs(int u=1,int p=0){
+    reversedArr[u]=arrSz;
+    arr[arrSz++]=u;
+    parent[u][0]=p;
+    depth[u]= depth[p] + 1;
+    sz[u]=1;
+    for(int v:graph[u]){
+        if(v==p)continue;
+        childs[u].push_back(v);
+        dfs(v,u);
+        sz[u]+=sz[v];
+    }
+}
+int main() {
+#ifdef CLION
+    freopen("std/in.txt", "rt", stdin);
+    // freopen("out.txt", "wt", stdout);
+#endif
+    scanf("%d%d",&n,&q);
+    loop(i,n){
+        scanf("%d",val+i+1);
+    }
+    loop(i,n-1){
+        int u,v;
+        scanf("%d%d",&u,&v);
+        graph[u].push_back(v);
+        graph[v].push_back(u);
+    }
+    memset(parent,-1,sizeof(parent));
+    dfs();
+    precomputeSparseMatrix();
+    rep(i,1,n){
+        update(reversedArr[i],reversedArr[i],val[i]);
+    }
+    root=1;
+    loop(i,q){
+        int t;
+        scanf("%d",&t);
+        if(t==1){
+            scanf("%d",&root);
+        }else if(t==2){
+            int u,v,x;
+            scanf("%d%d%d",&u,&v,&x);
+            int lca=getLCA(u,v);
+            if(lca==root or u==root or v==root){
+                update(0,n-1,x);
+            }else if(!checkIfInSubtree(lca,root)){
+                update(reversedArr[lca],reversedArr[lca]+sz[lca]-1,x);
+            }else{
+                if(checkIfInSubtree(root,u) or checkIfInSubtree(root,v)){
+                    update(0,n-1,x);
+                }else{
+                    int lcaRU=getLCA(root,u);
+                    int lcaRV=getLCA(root,v);
+                    int lca2=lcaRV;
+                    if(lcaRU!=lca){
+                        lca2=lcaRU;
+                    }
+                    if(i==4){
+                        i=4;
+                    }
+                    int bfr=getLastBeforeLCA(lca2,root);
+                    updateWithoutMe(x, bfr);
+                }
+            }
+        }else if(t==3){
+            int v;
+            scanf("%d",&v);
+            if(v==root){
+                printf("%lld\n",query(0,
+                                      n-1));
+            }else if(!checkIfInSubtree(v,root)){
+                printf("%lld\n",query(reversedArr[v],reversedArr[v]+sz[v]-1));
+            }else{
+                int gr=getLastBeforeLCA(v,root);
+                ll init=query(0,n-1);
+                init-=query(reversedArr[gr],reversedArr[gr]+sz[gr]-1);
+                printf("%lld\n",init);
+            }
+        }
+    }
+    return 0;
+}
