@@ -1,0 +1,172 @@
+#include <bits/stdc++.h>
+#include <ext/pb_ds/assoc_container.hpp>
+#include <unistd.h>
+
+#define ll long long
+#define lst(x) x.size()-1
+#define ld double
+#define pr pair<ll,ll>
+#define loop(i, n) for(int i=0 ; i<n ; ++i)
+#define rep(i, x, n) for(int i=x ; i<=n ; ++i)
+#define iteloop(type, data, name, it) for(type<data>::iterator it=name.begin() ;it!=name.end() ; ++it)
+
+using namespace __gnu_pbds;
+using namespace std;
+
+template<typename T>
+using os = tree<T, null_type, less<T>, rb_tree_tag,
+        tree_order_statistics_node_update>;
+
+const int N = 1e5 + 5,cmpSz=400,level=20,MOD=1e9+7, M = 2e3 + 5, MX = 1e9 + 5,MN = -MX ;
+ll d[N],h[N],pos[N];
+ll n,m;
+int curQ=-1;
+ll getDist(int st,int en){
+    if(curQ==-1) {
+        if (st <= en)return pos[en] - pos[st];
+        return pos[en] + pos[n - 1] - pos[st];
+    }else{
+        if(st<=en){
+            if(curQ>=st and curQ<=en)return pos[st] + pos[n - 1] - pos[en];
+            return pos[en] - pos[st];
+        }else{
+            if(curQ>=en and curQ<=st)return pos[en] + pos[n - 1] - pos[st];
+            return pos[st]-pos[en];
+        }
+    }
+}
+ll getAns(int a,int b){
+    return 2*(h[a]+h[b])+getDist(a,b);
+}
+int bst[N];
+pair<int,int> cmpAns[cmpSz];
+pair<int,int> getBest(vector<int> &ind){
+    if(ind.size()<2){
+        return {0,0};
+    }
+    ll mx=getAns(ind[0],ind[1]);
+    pair<int,int> res={ind[0],ind[1]};
+    bst[ind[1]] = ind[0];
+    rep(i,2,ind.size()-1){
+        ll ans1=getAns(ind[i-1],ind[i]);
+        ll ans2=getAns(bst[ind[i-1]],ind[i]);
+        if(ans1>=ans2){
+            bst[ind[i]]=ind[i-1];
+            if(ans1>=mx){
+                mx=ans1;
+                res={bst[ind[i]],ind[i]};
+            }
+        }else{
+            bst[ind[i]]=bst[ind[i-1]];
+            if(ans2>=mx){
+                mx=ans2;
+                res={bst[ind[i]],ind[i]};
+            }
+        }
+    }
+    return res;
+}
+int main() {
+#ifdef CLION
+    freopen("std/in.txt", "rt", stdin);
+    // freopen("out.txt", "wt", stdout);
+#endif
+    scanf("%lld%lld",&n,&m);
+    loop(i,n){
+        scanf("%lld",d+i);
+    }
+    pos[0]=d[n-1];
+    rep(i,1,n-1){
+        pos[i]=pos[i-1]+d[i-1];
+    }
+    loop(i,n){
+        scanf("%lld",h+i);
+    }
+    loop(i,cmpSz){
+        cmpAns[i]={-1,-1};
+    }
+    for(int i=0 ; i<n ; i+=cmpSz){
+        vector<int> cur;
+        for(int j=i ; j<i+cmpSz and j<n ; j++){
+            cur.push_back(j);
+        }
+        cmpAns[i/cmpSz] = getBest(cur);
+    }
+    loop(i,m){
+        int a,b;
+        scanf("%d%d",&a,&b);
+        --a;b--;
+        curQ=a;
+        vector<int> cur;
+        int cmpSt = a / cmpSz;
+        int cmpEn = b / cmpSz;
+        vector<int> cmpStVec, cmpEnVec;
+        if(cmpSt==cmpEn and b<a){
+            rep(j,b+1,a-1){
+                cur.push_back(j);
+            }
+        }else if(a<=b){
+            int en = (cmpEn + 1) * cmpSz;
+            for (int l = b + 1; l < en and l < n; l++) {
+                cmpEnVec.push_back(l);
+            }
+            if (cmpEnVec.size() == 1) {
+                cur.push_back(cmpEnVec[0]);
+            } else if (cmpEnVec.size() > 1) {
+                auto x = getBest(cmpEnVec);
+                cur.push_back(x.first);
+                cur.push_back(x.second);
+            }
+            rep(j,cmpEn+1, cmpSz) {
+                if (cmpAns[j] == make_pair(-1, -1))break;
+                cur.push_back(cmpAns[j].first);
+                cur.push_back(cmpAns[j].second);
+            }
+            loop(j,cmpSt){
+                if (cmpAns[j] == make_pair(-1, -1))break;
+                cur.push_back(cmpAns[j].first);
+                cur.push_back(cmpAns[j].second);
+            }
+            for (int l = cmpSt * cmpSz; l < a; l++) {
+                cmpStVec.push_back(l);
+            }
+            if (cmpStVec.size() == 1) {
+                cur.push_back(cmpStVec[0]);
+            } else if (cmpStVec.size() > 1) {
+                auto x = getBest(cmpStVec);
+                cur.push_back(x.first);
+                cur.push_back(x.second);
+            }
+        }else{
+            int en = (cmpEn + 1) * cmpSz;
+            for (int l = b + 1; l < en and l < n; l++) {
+                cmpEnVec.push_back(l);
+            }
+            if (cmpEnVec.size() == 1) {
+                cur.push_back(cmpEnVec[0]);
+            } else if (cmpEnVec.size() > 1) {
+                auto x = getBest(cmpEnVec);
+                cur.push_back(x.first);
+                cur.push_back(x.second);
+            }
+            rep(j,cmpEn+1, cmpSt-1) {
+                if (cmpAns[j] == make_pair(-1, -1))break;
+                cur.push_back(cmpAns[j].first);
+                cur.push_back(cmpAns[j].second);
+            }
+            for (int l = cmpSt * cmpSz; l < a; l++) {
+                cmpStVec.push_back(l);
+            }
+            if (cmpStVec.size() == 1) {
+                cur.push_back(cmpStVec[0]);
+            } else if (cmpStVec.size() > 1) {
+                auto x = getBest(cmpStVec);
+                cur.push_back(x.first);
+                cur.push_back(x.second);
+            }
+        }
+        auto s=getBest(cur);
+        printf("%lld\n",getAns(s.first,s.second));
+    }
+    return 0;
+}
