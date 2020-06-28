@@ -1,0 +1,58 @@
+#include <bits/stdc++.h>
+#include <ext/pb_ds/assoc_container.hpp>
+#include <unistd.h>
+
+#define ll long long
+#define lst(x) x.size()-1
+#define ld double
+#define pr pair<ll,ll>
+#define loop(i, n) for(int i=0 ; i<n ; ++i)
+#define rep(i, x, n) for(int i=x ; i<=n ; ++i)
+#define iteloop(type, data, name, it) for(type<data>::iterator it=name.begin() ;it!=name.end() ; ++it)
+
+using namespace __gnu_pbds;
+using namespace std;
+
+template<typename T>
+using os = tree<T, null_type, less<T>, rb_tree_tag,
+        tree_order_statistics_node_update>;
+
+const int N = 2e6 + 5,level=20,MOD=1e9+7, M = 2e3 + 5, MX = 1e9 + 5,MN = -MX ;
+ll fre[N],comFre[N],comSum[N];
+ll n,d,a,mxInc;
+int main() {
+#ifdef CLION
+    freopen("std/in.txt", "rt", stdin);
+    // freopen("out.txt", "wt", stdout);
+#endif
+    scanf("%d%d%d",&n,&d,&a);
+    mxInc=d/a;
+    loop(i,n){
+        int x;
+        scanf("%d",&x);
+        fre[x]++;
+    }
+    int mx=N-5;
+    rep(i,1,mx){
+        comFre[i]=fre[i]+comFre[i-1];
+        comSum[i]=comSum[i-1]+fre[i]*i;
+    }
+    ll ans=1e18;
+    rep(gcd,2,mx){
+        ll back=min(mxInc,(ll)gcd-1);
+        ll curAns=0;
+        for(int ind=gcd ; ind<=mx ; ind+=gcd){
+            int frst=ind-gcd+1;
+            int lstNonTaken=ind-back-1;
+            if(frst<=lstNonTaken){
+                curAns+=(comFre[lstNonTaken]-comFre[frst-1])*d;
+            }
+            ll cnt=comFre[ind]-comFre[ind-back-1];
+            ll sum=comSum[ind]-comSum[ind-back-1];
+            curAns+=((cnt*ind)-sum)*a;
+        }
+        ans=min(ans,curAns);
+    }
+    printf("%lld\n",ans);
+    return 0;
+}
