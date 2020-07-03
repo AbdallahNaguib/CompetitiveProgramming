@@ -1,0 +1,118 @@
+#include <bits/stdc++.h>
+#include <ext/pb_ds/assoc_container.hpp>
+#include <unistd.h>
+
+#define ll long long
+#define lst(x) x.size()-1
+#define ld double
+#define pr pair<ll,ll>
+#define loop(i, n) for(ll i=0 ; i<n ; ++i)
+#define rep(i, x, n) for(ll i=x ; i<=n ; ++i)
+#define iteloop(type, data, name, it) for(type<data>::iterator it=name.begin() ;it!=name.end() ; ++it)
+
+using namespace __gnu_pbds;
+using namespace std;
+
+template<typename T>
+using os = tree<T, null_type, less<T>, rb_tree_tag,
+        tree_order_statistics_node_update>;
+
+const ll N = 1e3 + 5,cmpSz=400,level=20,MOD=1e9+7, M = 2e3 + 5, MX = 1e9 + 5,MN = -MX ;
+ll mat[N][N],k,x;
+ll n,m;
+bool vis[N][N];
+ll par[N*N],cmSz[N*N];
+
+ll di[4]={1,-1,0,0};
+ll dj[4]={0,0,1,-1};
+bool valid(ll i,ll j){
+    return i>=0 and i<n and j>=0 and j<m;
+}
+ll cnt;
+void dfs(ll i,ll j){
+    if(cnt>=k/x)return;
+    vis[i][j]=true;
+    cnt++;
+    loop(l,4){
+        ll newI=di[l]+i;
+        ll newJ=dj[l]+j;
+        if(!vis[newI][newJ] and valid(newI,newJ) and mat[newI][newJ]>=x){
+            dfs(newI,newJ);
+        }
+    }
+}
+
+ll getId(ll i,ll j){
+    return i*m + j;
+}
+ll getPar(ll s){
+    if(par[s] == s)return s;
+    return par[s]=getPar(par[s]);
+}
+void connect(ll u,ll v){
+    ll p1=getPar(u);
+    ll p2=getPar(v);
+    if(p1==p2)return;
+    if(cmSz[p1]>cmSz[p2]){
+        par[p2]=p1;
+        cmSz[p1]+=cmSz[p2];
+    }else{
+        par[p1]=p2;
+        cmSz[p2]+=cmSz[p1];
+    }
+}
+int main() {
+#ifdef CLION
+    freopen("std/in.txt", "rt", stdin);
+    // freopen("out.txt", "wt", stdout);
+#endif
+    scanf("%lld%lld%lld",&n,&m,&k);
+    vector<pair<ll,pair<ll,ll>>> st;
+    loop(i,n){
+        loop(j,m){
+            scanf("%lld",&mat[i][j]);
+            st.push_back({mat[i][j],{i,j}});
+        }
+    }
+    loop(i,n*m){
+        par[i]=i;
+        cmSz[i]=1;
+    }
+    sort(st.begin(),st.end());
+    reverse(st.begin(),st.end());
+    pair<ll,ll> ans={-1ll,-1ll};
+    for(auto cur:st){
+        ll i=cur.second.first;
+        ll j=cur.second.second;
+        ll val=cur.first;
+        loop(l,4){
+            ll newI=di[l]+i;
+            ll newJ=dj[l]+j;
+            if(valid(newI,newJ) and mat[newI][newJ]>=val){
+                connect(getId(i,j),getId(newI,newJ));
+            }
+        }
+        if(k%val==0 and k/val<=cmSz[getPar(getId(i,j))]){
+            ans={i,j};
+            x=val;
+            break;
+        }
+    }
+    if(ans==make_pair(-1ll,-1ll)){
+        puts("NO");
+    }else{
+        puts("YES");
+        dfs(ans.first,ans.second);
+        loop(i,n){
+            loop(j,m){
+                if(vis[i][j]){
+                    printf("%lld",x);
+                }else{
+                    printf("0");
+                }
+                printf("%c"," \n"[j==m-1]);
+            }
+        }
+    }
+    return 0;
+}
