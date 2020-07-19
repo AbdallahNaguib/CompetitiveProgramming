@@ -1,0 +1,211 @@
+#include <bits/stdc++.h>
+#include <ext/pb_ds/assoc_container.hpp>
+#include <unistd.h>
+
+#define ll long long
+#define lst(x) x.size()-1
+#define ld double
+#define pr pair<ll,ll>
+#define loop(i, n) for(ll i=0 ; i<n ; ++i)
+#define rep(i, x, n) for(ll i=x ; i<=n ; ++i)
+#define iteloop(type, data, name, it) for(type<data>::iterator it=name.begin() ;it!=name.end() ; ++it)
+
+using namespace __gnu_pbds;
+using namespace std;
+
+template<typename T>
+using os = tree<T, null_type, less<T>, rb_tree_tag,
+        tree_order_statistics_node_update>;
+
+const ll N = 3e5 + 5,MOD=1e9+7, M = 2e3 + 5;
+ll n,k;
+pair<ll,ll> arr[N];
+
+int main() {
+#ifdef CLION
+    freopen("std/in.txt", "rt", stdin);
+    // freopen("out.txt", "wt", stdout);
+#endif
+    scanf("%lld%lld",&n,&k);
+    loop(i,n){
+        scanf("%lld",&arr[i].first);
+    }
+    loop(i,n){
+        scanf("%lld",&arr[i].second);
+
+    }
+    ll lst1=0,lst2=0;
+    loop(i,n){
+        // ending with 1
+        // end last with 1 start current with 1
+        ll a;
+        if(lst1==MOD){
+            a=MOD;
+        }else {
+            if (arr[i].second < arr[i].first) {
+                ll mid = (arr[i].second - 1) * k + (k - lst1);
+                a = max(1ll, arr[i].first - mid);
+                if(a>k){
+                    a=MOD;
+                }
+            } else {
+                ll mx = (arr[i].first - 1) * k;
+                if (mx >= arr[i].second) {
+                    a = 1;
+                } else {
+                    a = MOD;
+                }
+            }
+        }
+        // end last with 1 start current with 2
+        ll b;
+        if(lst1==MOD){
+            b=MOD;
+        }else {
+            if (arr[i].first <= arr[i].second) {
+                ll mx = arr[i].first * k;
+                if (mx >= arr[i].second) {
+                    b = 1;
+                } else {
+                    b = MOD;
+                }
+            } else {
+                ll tot = (arr[i].second - 1) * k;
+                b = max(1ll, arr[i].first - tot);
+                if (b > k) {
+                    b = MOD;
+                }
+            }
+        }
+        // end last with 2 start current with 1
+        ll c;
+        if(lst2==MOD){
+            c=MOD;
+        }else {
+            if (arr[i].second < arr[i].first) {
+                ll mid = arr[i].second * k;
+                c = max(1ll, arr[i].first - mid);
+                if (c > k) {
+                    // just a big value
+                    c = MOD;
+                }
+            } else {
+                ll mx = (arr[i].first - 1) * k;
+                if (mx >= arr[i].second) {
+                    c = 1;
+                } else {
+                    c = MOD;
+                }
+            }
+        }
+        // end last with 2 start current with 2
+        ll d;
+        if(lst2==MOD){
+            d=MOD;
+        }else {
+            if (arr[i].first <= arr[i].second) {
+                ll mx = (arr[i].first - 1) * k + (k - lst2);
+                if (mx >= arr[i].second) {
+                    d = 1;
+                } else {
+                    d = MOD;
+                }
+            } else {
+                ll tot = (arr[i].second - 1) * k;
+                d = max(1ll, arr[i].first - tot);
+                if (d > k) {
+                    d = MOD;
+                }
+            }
+        }
+        ll tmp=min({a,b,c,d});
+        // ending with 2
+        swap(arr[i].first,arr[i].second);
+        swap(lst1,lst2);
+        if(lst1==MOD){
+            a=MOD;
+        }else {
+            if (arr[i].second < arr[i].first) {
+                ll mid = (arr[i].second - 1) * k + (k - lst1);
+                a = max(1ll, arr[i].first - mid);
+                if (a > k) {
+                    // just a big value
+                    a = MOD;
+                }
+            } else {
+                ll mx = (arr[i].first - 1) * k;
+                if (mx >= arr[i].second) {
+                    a = 1;
+                } else {
+                    a = MOD;
+                }
+            }
+        }
+        // end last with 1 start current with 2
+        if(lst1==MOD){
+            b=MOD;
+        }else {
+            if (arr[i].first <= arr[i].second) {
+                ll mx = arr[i].first * k;
+                if (mx >= arr[i].second) {
+                    b = 1;
+                } else {
+                    b = MOD;
+                }
+            } else {
+                ll tot = (arr[i].second - 1) * k;
+                b = max(1ll, arr[i].first - tot);
+                if (b > k) {
+                    b = MOD;
+                }
+            }
+        }
+        // end last with 2 start current with 1
+        if(lst2==MOD){
+            c=MOD;
+        }else {
+            if (arr[i].second < arr[i].first) {
+                ll mid = arr[i].second * k;
+                c = max(1ll, arr[i].first - mid);
+                if (c > k) {
+                    // just a big value
+                    c = MOD;
+                }
+            } else {
+                ll mx = (arr[i].first - 1) * k;
+                if (mx >= arr[i].second) {
+                    c = 1;
+                } else {
+                    c = MOD;
+                }
+            }
+        }
+        // end last with 2 start current with 2
+        if(lst2==MOD){
+            d=MOD;
+        }else {
+            if (arr[i].first <= arr[i].second) {
+                ll mx = (arr[i].first - 1) * k + (k - lst2);
+                if (mx >= arr[i].second) {
+                    d = 1;
+                } else {
+                    d = MOD;
+                }
+            } else {
+                ll tot = (arr[i].second - 1) * k;
+                d = max(1ll, arr[i].first - tot);
+                if (d > k) {
+                    d = MOD;
+                }
+            }
+        }
+        lst1=tmp;
+        lst2=min({a,b,c,d});
+        if(lst1==MOD and lst2==MOD){
+            puts("NO");
+            return 0;
+        }
+    }
+    puts("YES");
+    return 0;
+}
