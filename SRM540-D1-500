@@ -1,0 +1,119 @@
+#include <bits/stdc++.h>
+#include <ext/pb_ds/assoc_container.hpp>
+#include <unistd.h>
+
+#define ll long long
+#define lst(x) x.size()-1
+#define F first
+#define S second
+#define ld double
+#define pr pair<ll,ll>
+#define loop(i, n) for(int i=0 ; i<n ; ++i)
+#define rep(i, x, n) for(int i=x ; i<=n ; ++i)
+#define iteloop(type, data, name, it) for(type<data>::iterator it=name.begin() ;it!=name.end() ; ++it)
+
+using namespace __gnu_pbds;
+using namespace std;
+
+template<typename T>
+using os = tree<T, null_type, less<T>, rb_tree_tag,
+        tree_order_statistics_node_update>;
+
+const ll N = 55,MOD=1e9+7,MX=1e9+1,MN=0, M = 2e3 + 5;
+ld prob[N][N][N],rowCom[N][N][N];
+int R,G,B;
+void constructCom(){
+    rep(i,1,R){
+        rep(j,1,G){
+            rep(k,1,B){
+                //  cout<<i<<" "<<j<<" "<<k<<" "<<prob[i][j][k]<<endl;
+                rowCom[i][j][k]=rowCom[i][j][k-1]+rowCom[i][j-1][k]
+                                -rowCom[i][j-1][k-1]+prob[i][j][k];
+            }
+        }
+    }
+}
+ld getSum(int &i1,int &j1,int &k1,int &i2,int &j2,int &k2){
+    if(i2<1){
+        i2=1;
+    }
+    if(i1>R){
+        i1=R;
+    }
+    if(j2<1){
+        j2=1;
+    }
+    if(j1>G){
+        j1=G;
+    }
+    if(k2<1){
+        k2=1;
+    }
+    if(k1>B){
+        k1=B;
+    }
+    if(i1<i2 or j1<j2 or k1<k2)return 0;
+    ld res=0;
+    rep(i,i2,i1){
+        auto &row=rowCom[i];
+        res+=row[j1][k1]-row[j1][k2-1]-row[j2-1][k1]+row[j2-1][k2-1];
+    }
+    return res;
+}
+class RandomColoring{
+public:
+    ld getProbability(int n, int maxR, int maxG, int maxB, int startR, int startG, int startB, int d1, int d2){
+        startR++;startG++;startB++;
+        rep(i,max(1,startR-d2),min(maxR,startR+d2)){
+            rep(j,max(1,startG-d2),min(maxG,startG+d2)){
+                rep(k,max(1,startB-d2),min(maxB,startB+d2)){
+                    int dI=abs(startR-i);
+                    int dJ=abs(startG-j);
+                    int dK=abs(startB-k);
+                    if(dI<d1 and dJ<d1 and dK<d1)continue;
+                    prob[i][j][k]=1;
+                }
+            }
+        }
+        R=maxR;
+        G=maxG;
+        B=maxB;
+        constructCom();
+        loop(f,n-1){
+            rep(startI,1,maxR){
+                rep(startJ,1,maxG){
+                    rep(startK,1,maxB){
+                        int i1=startI+d2;
+                        int i2=startI-d2;
+                        int j1=startJ+d2;
+                        int j2=startJ-d2;
+                        int k1=startK+d2;
+                        int k2=startK-d2;
+                        prob[startI][startJ][startK]=getSum(i1,j1,k1,i2,j2,k2);
+                        int totalTaken=0;
+                        if(i1>=i2 and j1>=j2 and k1>=k2)
+                            totalTaken+=(i1-i2+1)*(j1-j2+1)*(k1-k2+1);
+
+                        i1=startI+d1-1;
+                        i2=startI-d1+1;
+                        j1=startJ+d1-1;
+                        j2=startJ-d1+1;
+                        k1=startK+d1-1;
+                        k2=startK-d1+1;
+                        prob[startI][startJ][startK]-=getSum(i1,j1,k1,i2,j2,k2);
+                        if(i1>=i2 and j1>=j2 and k1>=k2)
+                            totalTaken-=(i1-i2+1)*(j1-j2+1)*(k1-k2+1);
+                        if(totalTaken!=0){
+                            prob[startI][startJ][startK]/=totalTaken;
+                        }else{
+                            prob[startI][startJ][startK]=0;
+                        }
+                    }
+                }
+            }
+            constructCom();
+        }
+        constructCom();
+        return 1-prob[startR][startG][startB];
+    }
+};
