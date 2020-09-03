@@ -1,0 +1,103 @@
+#include <bits/stdc++.h>
+/*#include <ext/pb_ds/assoc_container.hpp>
+#include <unistd.h>*/
+
+#define ll long long
+#define lst(x) x.size()-1
+#define F first
+#define S second
+#define ld long double
+#define pr pair<ll,ll>
+#define loop(i, n) for(int i=0 ; i<n ; ++i)
+#define rep(i, x, n) for(int i=x ; i<=n ; ++i)
+#define iteloop(type, data, name, it) for(type<data>::iterator it=name.begin() ;it!=name.end() ; ++it)
+
+//using namespace __gnu_pbds;
+using namespace std;
+
+/*template<typename T>
+using os = tree<T, null_type, less<T>, rb_tree_tag,
+        tree_order_statistics_node_update>;*/
+
+const ll N = 55,level=20,MOD=998244353,MX=1e12+1,MN=0, M = 2e3 + 5;
+int n;
+int string_to_int(string str){
+    int x=0;
+    loop(i,str.size()){
+        x*=10;
+        x+=(str[i]-'0');
+    }
+    return x;
+}
+ll dist[N][N];
+
+void addEdge(const string& s){
+    stringstream s1(s);
+    string d;
+    while(getline(s1,d,' ')) {
+        stringstream ss(d);
+        string v;
+        vector<int> vec;
+        while (getline(ss, v, ',')) {
+            vec.push_back(string_to_int(v));
+        }
+        dist[vec[0]][vec[1]] = vec[2];
+        dist[vec[1]][vec[0]] = vec[2];
+    }
+}
+void floyd(){
+    loop(i,n){
+        dist[i][i]=0;
+    }
+    for (int k = 0; k < n; k++){
+        for (int i = 0; i < n; i++){
+            for (int j = 0; j < n; j++){
+                if (dist[i][k] + dist[k][j] < dist[i][j])
+                    dist[i][j] = dist[i][k] + dist[k][j];
+            }
+        }
+    }
+}
+ll memo[N][N][N][3];
+ll dp(int u,int st,int en,vector<int> &cities,bool tk){
+    if(st>en)return 0;
+    ll &res=memo[u][st][en][tk];
+    if(~res)return res;
+    if(st==en)return res=dist[u][cities[st]];
+    if(cities[st]==u){
+        return res=dp(u,st+1,en,cities,true);
+    }else if(cities[en]==u){
+        return res=dp(u,st,en-1,cities,true);
+    }
+    res=MX;
+    rep(sz,1,en-st+tk){
+        loop(c,n){
+            res=min(res,dist[u][c]+dp(c,st,st+sz-1,cities,false)+dp(u,st+sz,en,cities,true));
+        }
+    }
+    res=min(res,dist[u][cities[st]]+dp(cities[st],st+1,en,cities,true));
+    res=min(res,dist[u][cities[en]]+dp(cities[en],st,en-1,cities,true));
+    return res;
+}
+
+class TimeTravellingTour{
+public:
+    ll determineCost(int x, vector <int> cts, vector <string> roads){
+        cts.push_back(0);
+        n=x;
+        loop(i,n){
+            loop(j,n){
+                dist[i][j]=MX;
+            }
+        }
+        memset(memo,-1,sizeof(memo));
+        string str="";
+        loop(i,roads.size()){
+            str+=roads[i];
+        }
+        addEdge(str);
+        floyd();
+        ll ans=dp(0,0,(int)cts.size()-1,cts,false);
+        return ans>=MX?-1:ans;
+    }
+};
