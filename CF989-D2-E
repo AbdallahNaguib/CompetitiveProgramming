@@ -1,0 +1,208 @@
+#include <bits/stdc++.h>
+/*#include <ext/pb_ds/assoc_container.hpp>
+#include <unistd.h>*/
+
+#define ll long long
+#define lst(x) x.size()-1
+#define F first
+#define S second
+#define ld long double
+#define pr pair<int,int>
+#define prr pair<pr,pr>
+#define all(x) x.begin() , x.end()
+#define loop(i, n) for(int i=0 ; i<n ; ++i)
+#define rep(i, x, n) for(int i=x ; i<=n ; ++i)
+#define iteloop(type, data, name, it) for(type<data>::iterator it=name.begin() ;it!=name.end() ; ++it)
+
+//using namespace __gnu_pbds;
+using namespace std;
+
+/*template<typename T>
+using os = tree<T, null_type, less<T>, rb_tree_tag,
+        tree_order_statistics_node_update>;*/
+
+const ll N = 2e2 + 5,M=1e6+5,level=25,MOD=998244353,MX=1e18+5,MN=-MX;
+template<typename T>
+T gcd(T a, T b) {
+    if (b == 0)
+        return a;
+    return gcd(b, a % b);
+}
+template<typename T>
+struct mat;
+void printMat(mat<double> m);
+
+prr getOptimalLine(set<prr> &vector);
+
+template<typename T>
+struct mat{
+    vector<vector<T>> arr;
+    int r,c;
+    mat(int r,int c){
+        arr.resize(r);
+        loop(i,r){
+            arr[i].resize(c);
+        }
+        this->r=r;
+        this->c=c;
+    }
+    mat makeIdentity(){
+        mat res(r,c);
+        loop(i,r){
+            loop(j,c){
+                if(i==j)res.arr[i][j]=1;
+                else res.arr[i][j]=0;
+            }
+        }
+        return res;
+    }
+    mat operator*(const mat &m2)const{
+        mat<T> res(r,m2.c);
+        loop(i,r){
+            loop(j,m2.c){
+                res.arr[i][j]=0;
+                loop(k,c){
+                    res.arr[i][j]+=arr[i][k]*m2.arr[k][j];
+                }
+            }
+        }
+        return res;
+    }
+};
+mat<double> power(mat<double> &m,int p){
+    if(p==0)return m.makeIdentity();
+    if(p==1)return m;
+    mat<double> m2=m*m;
+    if(p&1){
+        return m*power(m2,p>>1);
+    }
+    return power(m2,p>>1);
+}
+int n;
+pr pts[N];
+pr simplify(pr p){
+    int xDiff=p.first;
+    int yDiff=p.second;
+    if(xDiff<0 and yDiff<0){
+        xDiff*=-1;
+        yDiff*=-1;
+    }else if(yDiff<0){
+        xDiff*=-1;
+        yDiff*=-1;
+    }
+    int g=gcd(abs(xDiff),yDiff);
+    if(g!=0) {
+        xDiff /= g;
+        yDiff /= g;
+    }
+    return {xDiff,yDiff};
+}
+prr getLine(pr p1,pr p2){
+    pr a=simplify({p2.second-p1.second,p2.first-p1.first});
+    if(a.first==0)a.second=1;
+    if(a.second==0)a.first=1;
+    pr b=simplify({p1.second*p2.first-p2.second*p1.first,p1.first-p2.first});
+    if(b.second==0)b.first=p1.first;
+    return {a,b};
+}
+set<prr> pointToLine[N];
+bool contains(set<int> &st,int x){
+    return st.lower_bound(x)!=st.upper_bound(x);
+}
+void printMat(mat<double> m){
+    loop(i,m.r){
+        loop(j,m.c){
+            cout<<m.arr[i][j]<<" ";
+        }
+        cout<<endl;
+    }
+}
+map<prr,set<int>> lines;
+// O(N)
+int getValue(prr x){
+    int val=0;
+    for(int p:lines[x]){
+        val+=pointToLine[p].size();
+    }
+    return val;
+}
+// O(N*N)
+prr getOptimalLine(set<prr> &vec) {
+    prr line;
+    int mn=1e9;
+    for(prr lineT:vec){
+        int v=getValue(lineT);
+        if(v<mn){
+            mn=v;
+            line=lineT;
+        }
+    }
+    return line;
+}
+int main() {
+#ifdef CLION
+    freopen("std/in.txt", "rt", stdin);
+    // freopen("std/in.txt", "wt", stdout);
+    //freopen("std/out.txt", "wt", stdout);
+#else
+    //freopen("input.txt", "rt", stdin);
+    //freopen("output.txt", "wt", stdout);
+#endif
+    scanf("%d",&n);
+    loop(i,n){
+        scanf("%d%d",&pts[i].first,&pts[i].second);
+        loop(j,i){
+            prr line=getLine(pts[i],pts[j]);
+            lines[line].insert(i);
+            lines[line].insert(j);
+            pointToLine[i].insert(line);
+            pointToLine[j].insert(line);
+        }
+    }
+    mat<double> m(n,n);
+    loop(i,n){
+        loop(j,n){
+            if(i==j)continue;
+            prr line=getLine(pts[i],pts[j]);
+            double probToLine=1.0/pointToLine[i].size();
+            m.arr[j][i]=probToLine*(1.0/lines[line].size());
+        }
+    }
+    loop(i,n){
+        m.arr[i][i]=0.0;
+        double probToLine=1.0/pointToLine[i].size();
+        for(prr line:pointToLine[i]){
+            m.arr[i][i]+=probToLine*(1.0/lines[line].size());
+        }
+    }
+    vector<mat<double>> matP;
+    for(int i=1 ; i<=10000 ; i*=2){
+        matP.push_back(power(m,i));
+    }
+    int q;
+    scanf("%d",&q);
+    while(q--){
+        int pt,s;
+        scanf("%d%d",&pt,&s);
+        pt--;s--;
+        prr line=getOptimalLine(pointToLine[pt]);
+        mat<double> m2(n,1);
+        double prop=1.0/lines[line].size();
+        loop(i,n){
+            if(contains(lines[line],i)){
+                m2.arr[i][0]=prop;
+            }else{
+                m2.arr[i][0]=0;
+            }
+        }
+        for(int i=(int)matP.size()-1 ; i>=0 ; i--){
+            int p=(1<<i);
+            if(s>=p){
+                s-=p;
+                m2=matP[i]*m2;
+            }
+        }
+        printf("%.10f\n",m2.arr[pt][0]);
+    }
+}
+
