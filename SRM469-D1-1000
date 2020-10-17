@@ -1,0 +1,96 @@
+#include <bits/stdc++.h>
+/*#include <ext/pb_ds/assoc_container.hpp>
+#include <unistd.h>*/
+
+#define ll long long
+#define lst(x) x.size()-1
+#define F first
+#define S second
+#define ld long double
+#define pr pair<int,int>
+#define prr pair<pr,pr>
+#define all(x) x.begin() , x.end()
+#define loop(i, n) for(int i=0 ; i<n ; ++i)
+#define rep(i, x, n) for(int i=x ; i<=n ; ++i)
+#define iteloop(type, data, name, it) for(type<data>::iterator it=name.begin() ;it!=name.end() ; ++it)
+
+//using namespace __gnu_pbds;
+using namespace std;
+
+/*template<typename T>
+using os = tree<T, null_type, less<T>, rb_tree_tag,
+        tree_order_statistics_node_update>;*/
+
+const ll N = 50,M=48*20,level=25,MOD=998244353,MX=1e18+5,MN=-MX;
+ll memo[N][M];
+int n,a[N],comA[N],b[N];
+ll dp(int i,int sum){
+    if(sum<=0)return 0;
+    if(i>=n)return 1;
+    ll &res=memo[i][sum];
+    if(~res)return res;
+    return res=dp(i+1,sum-a[i])+dp(i+1,sum);
+}
+ll memo2[2][M+N][M+N];
+ll dp2(){
+    for(int i=n-1 ; ~i ; --i){
+        loop(preNeed,M){
+            loop(sum,M){
+                int preA=i>0?comA[i-1]:0;
+                int need=sum+b[i]-preA;
+                ll &res=memo2[i&1][preNeed][sum];
+                res=0;
+                if(need>preNeed) {
+                    res += dp(i + 1, need);
+                    res -= dp(i + 1, preNeed);
+                }
+                res+=memo2[!(i&1)][max(0,preNeed-a[i])][sum];
+                if(sum+b[i]<M)
+                    res+=memo2[!(i&1)][max(need,preNeed)][sum+b[i]];
+            }
+        }
+    }
+    return memo2[0][0][0];
+}
+void fill(vector<int> &aT,vector<int> &bT){
+    memset(memo,-1,sizeof(memo));
+    memset(memo2,0,sizeof(memo2));
+    n=aT.size();
+    int i=0;
+    for(int x:aT){
+        a[i]=x;
+        comA[i]=a[i];
+        if(i)comA[i]+=comA[i-1];
+        i++;
+    }
+    i=0;
+    for(int x:bT){
+        b[i++]=x;
+    }
+}
+class TheMoviesLevelThreeDivOne{
+public:
+    ll find(vector <int> timeB, vector <int> timeJ){
+        fill(timeB,timeJ);
+        ll bad = dp2();
+        fill(timeJ,timeB);
+        bad+=dp2();
+        return (1ll<<n)-bad;
+    }
+};
+
+int main() {
+#ifdef CLION
+    freopen("std/in.txt", "rt", stdin);
+    //freopen("std/out.txt", "wt", stdout);
+#else
+    //freopen("input.txt", "rt", stdin);
+    //freopen("output.txt", "wt", stdout);
+#endif
+    TheMoviesLevelThreeDivOne t;
+    cout<<t.find({1, 4},{4, 2})<<endl;
+    cout<<t.find({1,2,3},{3,2,1})<<endl;
+    cout<<t.find({1, 2, 3, 4, 5, 6, 7},{7, 6, 5, 4, 3, 2, 1})<<endl;
+    cout<<t.find({10, 10, 10, 10},{1, 1, 1, 10})<<endl;
+    cout<<t.find({4, 4},{4, 4})<<endl;
+}
