@@ -1,0 +1,95 @@
+#include <bits/stdc++.h>
+/*#include <ext/pb_ds/assoc_container.hpp>
+#include <unistd.h>*/
+
+#define ll long long
+#define lst(x) x.size()-1
+#define F first
+#define S second
+#define ld long double
+#define all(x) x.begin() , x.end()
+#define loop(i, n) for(int i=0 ; i<n ; ++i)
+#define rep(i, x, n) for(int i=x ; i<=n ; ++i)
+#define iteloop(type, data, name, it) for(type<data>::iterator it=name.begin() ;it!=name.end() ; ++it)
+
+//using namespace __gnu_pbds;
+using namespace std;
+
+/*template<typename T>
+using os = tree<T, null_type, less<T>, rb_tree_tag,
+        tree_order_statistics_node_update>;*/
+
+const ll N = 3e3 + 5, M = 48 * 20, level = 25, MOD = 1e9+7, MX = 1e18 + 5, MN = -MX;
+int arr[N],n,q,lstPro[N][N];
+ll dp[N][N],dp2[N][N],pow2[N];
+ll calc(int i,int j,int cur){
+    int diff=cur-lstPro[i][j];
+    lstPro[i][j]=cur;
+    dp[i][j]*=pow2[diff];
+    dp[i][j]%=MOD;
+    return dp[i][j];
+}
+int main() {
+#ifdef CLION
+    freopen("std/in.txt", "rt", stdin);
+    //freopen("std/out.txt", "wt", stdout);
+#else
+    //freopen("input.txt", "rt", stdin);
+        //freopen("output.txt", "wt", stdout);
+#endif
+    pow2[0]=1;
+    rep(i,1,N-1){
+        pow2[i]=pow2[i-1]*2;
+        pow2[i]%=MOD;
+    }
+    scanf("%d%d",&n,&q);
+    loop(i,n){
+        scanf("%d",&arr[i]);
+    }
+    loop(i,n){
+        loop(j,n){
+            dp[i][j]=arr[i]>arr[j];
+        }
+    }
+    rep(i,1,q){
+        int x,y;
+        scanf("%d%d",&x,&y);
+        x--;y--;
+        loop(k,n){
+            if(k!=x and k!=y) {
+                dp2[k][x] = calc(k, x, i - 1) + calc(k, y, i - 1);
+                dp2[x][k] = calc(x, k, i - 1) + calc(y, k, i - 1);
+                dp2[k][y] = calc(k, y, i - 1) + calc(k, x, i - 1);
+                dp2[y][k] = calc(y, k, i - 1) + calc(x, k, i - 1);
+                dp2[k][x]%=MOD;
+                dp2[k][y]%=MOD;
+                dp2[x][k]%=MOD;
+                dp2[y][k]%=MOD;
+            }
+        }
+        dp2[x][y]=dp2[y][x]=(calc(x,y,i-1)+calc(y,x,i-1))%MOD;
+        loop(k,n) {
+            if (k != x and k != y) {
+                dp[x][k] = dp2[x][k];
+                dp[k][x] = dp2[k][x];
+                dp[y][k] = dp2[y][k];
+                dp[k][y] = dp2[k][y];
+                lstPro[k][y] = i;
+                lstPro[y][k] = i;
+                lstPro[k][x] = i;
+                lstPro[x][k] = i;
+            }
+        }
+        dp[x][y]=dp2[x][y];
+        dp[y][x]=dp2[y][x];
+        lstPro[x][y]=lstPro[y][x]=i;
+    }
+    ll ans=0;
+    loop(i,n){
+        rep(j,i+1,n-1){
+            ans+=calc(i,j,q);
+            ans%=MOD;
+        }
+    }
+    printf("%lld\n",ans);
+}
